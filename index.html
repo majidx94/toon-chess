@@ -2,13 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Toon Chess 3D - v12 3-Mode Lighting Selector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Toon Chess 3D</title>
+
+  <!-- Mobile Full-Screen PWA Meta Tags (iOS Safari & Android Chrome) -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Toon Chess" />
+  <meta name="application-name" content="Toon Chess" />
+  <meta name="theme-color" content="#1a1a2e" />
+
+  <!-- Embedded SVG Cartoon Chess App Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%231a1a2e'/%3E%3Crect x='24' y='24' width='464' height='464' rx='95' fill='%23f4a261' stroke='%231a1a2e' stroke-width='16'/%3E%3Ccircle cx='256' cy='256' r='185' fill='%23fff8ee' stroke='%231a1a2e' stroke-width='18'/%3E%3Cpath d='M160 360 L352 360 L332 230 L295 275 L256 175 L217 275 L180 230 Z' fill='%23ffbe0b' stroke='%231a1a2e' stroke-width='18' stroke-linejoin='round'/%3E%3Crect x='148' y='360' width='216' height='42' rx='16' fill='%2306d6a0' stroke='%231a1a2e' stroke-width='18'/%3E%3Ccircle cx='175' cy='198' r='18' fill='%23ef476f' stroke='%231a1a2e' stroke-width='12'/%3E%3Ccircle cx='256' cy='142' r='22' fill='%2306d6a0' stroke='%231a1a2e' stroke-width='12'/%3E%3Ccircle cx='337' cy='198' r='18' fill='%23ef476f' stroke='%231a1a2e' stroke-width='12'/%3E%3C/svg%3E" />
+
+  <!-- Dynamic PNG Apple Touch Icon & Web App Manifest Generator for 100% Standalone Fullscreen -->
+  <script>
+    (function setupMobilePWA() {
+      const iconCanvas = document.createElement('canvas');
+      iconCanvas.width = 512;
+      iconCanvas.height = 512;
+      const c = iconCanvas.getContext('2d');
+
+      // Background rounded card
+      c.fillStyle = '#f4a261';
+      c.fillRect(0, 0, 512, 512);
+      c.strokeStyle = '#1a1a2e';
+      c.lineWidth = 28;
+      c.strokeRect(14, 14, 484, 484);
+
+      // Inner badge circle
+      c.beginPath();
+      c.arc(256, 260, 185, 0, Math.PI * 2);
+      c.fillStyle = '#fff8ee';
+      c.fill();
+      c.lineWidth = 20;
+      c.stroke();
+
+      // Cartoon Crown / Chess Piece
+      c.beginPath();
+      c.moveTo(155, 355);
+      c.lineTo(357, 355);
+      c.lineTo(340, 220);
+      c.lineTo(295, 270);
+      c.lineTo(256, 165);
+      c.lineTo(217, 270);
+      c.lineTo(172, 220);
+      c.closePath();
+      c.fillStyle = '#ffbe0b';
+      c.fill();
+      c.lineJoin = 'round';
+      c.lineWidth = 20;
+      c.stroke();
+
+      // Base pedestal
+      c.fillStyle = '#06d6a0';
+      c.fillRect(145, 355, 222, 46);
+      c.strokeRect(145, 355, 222, 46);
+
+      // Cute eyes on the crown
+      [224, 288].forEach(ex => {
+        c.beginPath();
+        c.arc(ex, 310, 14, 0, Math.PI * 2);
+        c.fillStyle = '#1a1a2e';
+        c.fill();
+        c.beginPath();
+        c.arc(ex - 4, 306, 5, 0, Math.PI * 2);
+        c.fillStyle = '#ffffff';
+        c.fill();
+      });
+
+      const pngDataUrl = iconCanvas.toDataURL('image/png');
+
+      // Attach Apple Touch Icon for iOS Home Screen
+      const appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = pngDataUrl;
+      document.head.appendChild(appleIcon);
+
+      // Attach Web App Manifest for Android Chrome Fullscreen Standalone Mode
+      const manifest = {
+        name: 'Toon Chess 3D',
+        short_name: 'Toon Chess',
+        description: '3D Cartoon Chess Game',
+        start_url: './index.html',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#1a1a2e',
+        theme_color: '#1a1a2e',
+        icons: [
+          { src: pngDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = URL.createObjectURL(manifestBlob);
+      document.head.appendChild(manifestLink);
+    })();
+  </script>
   <style>
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-touch-callout: none;
+    }
+    body {
       /* Default: Sunny Pop Mode */
       background: radial-gradient(circle at center, #fff3c4 0%, #ffca58 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,7 +129,7 @@
     }
     #top-hud {
       position: absolute;
-      top: 10px;
+      top: max(10px, env(safe-area-inset-top, 10px));
       left: 50%;
       transform: translateX(-50%);
       display: flex;
