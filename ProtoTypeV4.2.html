@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Toon Chess 3D - v10 Horse Knight & Sapphire Palette</title>
+  <style>
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #fff3c4 0%, #ffca58 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      touch-action: none;
+      transition: background 0.35s ease;
+    }
+    body.dark-mode {
+      background: radial-gradient(circle at center, #232946 0%, #0f1021 100%);
+    }
+    #top-hud {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+      width: 96vw;
+      max-width: 780px;
+      pointer-events: none;
+    }
+    #ui-bar, #trophy-bar {
+      pointer-events: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      align-items: center;
+      background: #ffffff;
+      border: 4px solid #1a1a2e;
+      border-radius: 999px;
+      padding: 6px 14px;
+      box-shadow: 0 5px 0 #1a1a2e;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    body.dark-mode #ui-bar, body.dark-mode #trophy-bar {
+      background: #1f243d;
+      border-color: #0b0d19;
+      box-shadow: 0 5px 0 #0b0d19;
+    }
+    #trophy-bar {
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 900;
+      gap: 14px;
+      min-height: 32px;
+    }
+    .trophy-side {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #1a1a2e;
+    }
+    body.dark-mode .trophy-side {
+      color: #fffffe;
+    }
+    .clock-pill {
+      background: #ffbe0b;
+      color: #1a1a2e;
+      border: 2px solid #1a1a2e;
+      border-radius: 99px;
+      padding: 1px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      display: none;
+    }
+    #turn-badge {
+      font-weight: 900;
+      font-size: 13px;
+      color: #1a1a2e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+    body.dark-mode #turn-badge {
+      color: #fffffe;
+    }
+    .btn {
+      background: #06d6a0;
+      color: #1a1a2e;
+      border: 3px solid #1a1a2e;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #1a1a2e;
+      transition: transform 0.1s, opacity 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 #1a1a2e;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: 0 2px 0 #1a1a2e;
+    }
+    .vol-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #a8dadc;
+      border: 3px solid #1a1a2e;
+      border-radius: 999px;
+      padding: 3px 9px;
+      box-shadow: 0 3px 0 #1a1a2e;
+    }
+    #mute-icon {
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+    }
+    #vol-slider {
+      width: 52px;
+      height: 6px;
+      accent-color: #1a1a2e;
+      cursor: pointer;
+      margin: 0;
+    }
+    /* Shared Comic Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 26, 46, 0.72);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 12px;
+    }
+    .modal-card {
+      position: relative;
+      background: #ffffff;
+      border: 5px solid #1a1a2e;
+      border-radius: 26px;
+      padding: 18px 20px;
+      text-align: center;
+      box-shadow: 0 10px 0 #1a1a2e;
+      max-width: 94vw;
+      width: 440px;
+      max-height: 92vh;
+      overflow-y: auto;
+      animation: popIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .modal-card {
+      background: #232946;
+      border-color: #0b0d19;
+      box-shadow: 0 10px 0 #0b0d19;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .close-modal-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid #1a1a2e;
+      background: #ef476f;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #1a1a2e;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .close-modal-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1a1a2e;
+    }
+    #resume-game-btn {
+      display: none;
+      width: 100%;
+      margin: 8px 0 6px 0;
+      background: #00f5d4;
+      color: #1a1a2e;
+      border: 4px solid #1a1a2e;
+      border-radius: 16px;
+      padding: 11px 14px;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #1a1a2e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s;
+    }
+    #resume-game-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #1a1a2e;
+    }
+    .modal-title {
+      margin: 0 0 2px 0;
+      font-size: 23px;
+      font-weight: 900;
+      color: #1a1a2e;
+      text-transform: uppercase;
+    }
+    body.dark-mode .modal-title { color: #fffffe; }
+    .modal-sub {
+      margin: 4px 0 14px 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #444;
+    }
+    body.dark-mode .modal-sub { color: #b8c1ec; }
+    .section-label {
+      margin: 10px 0 5px 0;
+      font-size: 11px;
+      font-weight: 900;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    body.dark-mode .section-label { color: #b8c1ec; }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+    .pill-btn {
+      flex: 1;
+      min-width: 78px;
+      border: 3px solid #1a1a2e;
+      border-radius: 12px;
+      padding: 7px 5px;
+      font-weight: 900;
+      font-size: 11px;
+      background: #f4f4f8;
+      color: #1a1a2e;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #1a1a2e;
+      transition: all 0.1s;
+    }
+    .pill-btn.active {
+      background: #ffbe0b;
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1a1a2e;
+    }
+    .team-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .team-choice {
+      border: 4px solid #1a1a2e;
+      border-radius: 18px;
+      padding: 12px 8px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #1a1a2e;
+      transition: transform 0.12s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .team-choice:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #1a1a2e;
+    }
+    .team-mint { background: #06d6a0; color: #1a1a2e; }
+    .team-neon { background: #ef476f; color: #ffffff; }
+    .team-tag {
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(26, 26, 46, 0.2);
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .promo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .promo-btn {
+      border: 4px solid #1a1a2e;
+      border-radius: 18px;
+      padding: 14px 10px;
+      font-weight: 900;
+      font-size: 15px;
+      background: #ffbe0b;
+      color: #1a1a2e;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .end-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .action-btn {
+      border: 4px solid #1a1a2e;
+      border-radius: 18px;
+      padding: 13px 16px;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #1a1a2e;
+      text-transform: uppercase;
+    }
+    #comic-popup {
+      position: absolute;
+      top: 34%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 54px;
+      font-weight: 900;
+      color: #ffbe0b;
+      -webkit-text-stroke: 3px #1a1a2e;
+      text-shadow: 5px 5px 0 #ef476f;
+      pointer-events: none;
+      transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 20;
+    }
+    #hint {
+      position: absolute;
+      bottom: 12px;
+      width: 100%;
+      text-align: center;
+      font-weight: 800;
+      font-size: 12px;
+      color: #1a1a2e;
+      pointer-events: none;
+    }
+    body.dark-mode #hint { color: #b8c1ec; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+
+  <!-- Top HUD: Controls + Captured Trophy Bar -->
+  <div id="top-hud">
+    <div id="ui-bar">
+      <span id="turn-badge">🟢 Mint's Turn</span>
+      <button class="btn" id="undo-btn" style="background:#ff9f1c;" disabled>↩️ Undo</button>
+      <button class="btn" id="hint-btn" style="background:#00f5d4;">💡 Hint</button>
+      <button class="btn" id="env-btn" style="background:#ddb892;">🌌 Void</button>
+      <button class="btn" id="theme-btn" style="background:#b8c1ec;">☀️ Light</button>
+      <button class="btn" id="cam-btn">2D / 3D</button>
+      <div class="vol-group" title="Adjust Sound Volume">
+        <span id="mute-icon">🔊</span>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" />
+      </div>
+      <button class="btn" id="reset-btn" style="background:#ffbe0b;">⚙️ Menu</button>
+    </div>
+
+    <!-- Live Captured Pieces & Timer Bar -->
+    <div id="trophy-bar">
+      <div class="trophy-side">
+        <span id="w-team-dot">🟢</span>
+        <span class="clock-pill" id="w-clock">05:00</span>
+        <span id="w-captured">—</span>
+      </div>
+      <span style="opacity:0.35;">|</span>
+      <div class="trophy-side">
+        <span id="b-team-dot">🌸</span>
+        <span class="clock-pill" id="b-clock">05:00</span>
+        <span id="b-captured">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Arcade Game Setup / Pause Menu Modal -->
+  <div id="team-modal" class="modal-overlay" onclick="handleModalBackdropClick(event)">
+    <div class="modal-card">
+      <button class="close-modal-btn" id="close-menu-x" onclick="resumeCurrentGame()" title="Back to Game">✕</button>
+      <h2 class="modal-title">⚡ Toon Chess 3D</h2>
+
+      <button id="resume-game-btn" onclick="resumeCurrentGame()">▶️ Resume Current Game</button>
+
+      <div class="section-label">1. Game Mode & AI Difficulty</div>
+      <div class="pill-row" style="margin-bottom: 6px;">
+        <button class="pill-btn active" id="mode-ai" onclick="setMode('ai')">🤖 Vs AI</button>
+        <button class="pill-btn" id="mode-2p" onclick="setMode('2p')">👥 2P Pass & Play</button>
+      </div>
+      <div id="diff-section" class="pill-row">
+        <button class="pill-btn" id="diff-easy" onclick="setDiff('easy')">🌱 Easy</button>
+        <button class="pill-btn active" id="diff-med" onclick="setDiff('medium')">⚔️ Medium</button>
+        <button class="pill-btn" id="diff-hard" onclick="setDiff('hard')">🔥 Hard</button>
+      </div>
+
+      <div class="section-label">2. 3D Stage Environment</div>
+      <div class="pill-row">
+        <button class="pill-btn active" id="env-void" onclick="setEnvironment('void')">🌌 Void</button>
+        <button class="pill-btn" id="env-table" onclick="setEnvironment('table')">🪵 Table</button>
+        <button class="pill-btn" id="env-island" onclick="setEnvironment('island')">🏝️ Island</button>
+        <button class="pill-btn" id="env-castle" onclick="setEnvironment('castle')">🏰 Castle</button>
+      </div>
+
+      <div class="section-label">3. Squad Color Theme & Lighting</div>
+      <div class="pill-row" style="margin-bottom: 6px;">
+        <button class="pill-btn active" id="skin-mint" onclick="setSquadSkin('mint')">🟢 Mint / Neon</button>
+        <button class="pill-btn" id="skin-royal" onclick="setSquadSkin('royal')">🥂 Ivory / Sapphire</button>
+        <button class="pill-btn" id="skin-cyber" onclick="setSquadSkin('cyber')">⚡ Cyber / Berry</button>
+      </div>
+      <div class="pill-row">
+        <button class="pill-btn active" id="theme-light" onclick="setDarkMode(false)">☀️ Day Mode</button>
+        <button class="pill-btn" id="theme-dark" onclick="setDarkMode(true)">🌙 Dark Mode</button>
+      </div>
+
+      <div class="section-label">4. Match Clock (Blitz Timer)</div>
+      <div class="pill-row">
+        <button class="pill-btn active" id="time-0" onclick="setTimerSetting(0)">∞ Relaxed</button>
+        <button class="pill-btn" id="time-180" onclick="setTimerSetting(180)">⚡ 3 Min</button>
+        <button class="pill-btn" id="time-300" onclick="setTimerSetting(300)">⏱️ 5 Min</button>
+        <button class="pill-btn" id="time-600" onclick="setTimerSetting(600)">⏳ 10 Min</button>
+      </div>
+
+      <div class="section-label" id="start-label">5. Start New Game As:</div>
+      <div class="team-grid">
+        <button class="team-choice team-mint" id="btn-pick-w" onclick="startNewGame('w')">
+          <span style="font-size:26px;" id="icon-pick-w">🟢</span>
+          <span id="name-pick-w">MINT</span>
+          <span class="team-tag">New Game (1st)</span>
+        </button>
+        <button class="team-choice team-neon" id="btn-pick-b" onclick="startNewGame('b')">
+          <span style="font-size:26px;" id="icon-pick-b">🌸</span>
+          <span id="name-pick-b">NEON</span>
+          <span class="team-tag">New Game (2nd)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Pawn Promotion Picker Modal -->
+  <div id="promo-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h2 class="modal-title">👑 Promote Soldier!</h2>
+      <p class="modal-sub">Your pawn reached the final rank! Choose which soldier to summon:</p>
+      <div class="promo-grid">
+        <button class="promo-btn" style="background:#ffbe0b;" onclick="confirmPromotion('q')">
+          <span style="font-size:30px;">👑</span>
+          <span>QUEEN</span>
+          <span class="team-tag">Most Powerful</span>
+        </button>
+        <button class="promo-btn" style="background:#06d6a0;" onclick="confirmPromotion('r')">
+          <span style="font-size:30px;">🏰</span>
+          <span>ROOK</span>
+          <span class="team-tag">Castle Tower</span>
+        </button>
+        <button class="promo-btn" style="background:#a8dadc;" onclick="confirmPromotion('b')">
+          <span style="font-size:30px;">🔮</span>
+          <span>BISHOP</span>
+          <span class="team-tag">Diagonal Sniper</span>
+        </button>
+        <button class="promo-btn" style="background:#ff9f1c;" onclick="confirmPromotion('n')">
+          <span style="font-size:30px;">🐴</span>
+          <span>KNIGHT</span>
+          <span class="team-tag">L-Jump Trickster</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Game Over (Win / Lose / Draw / Timeout) Modal -->
+  <div id="gameover-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div id="gameover-icon" style="font-size:54px; margin-bottom:4px;">🏆</div>
+      <h2 class="modal-title" id="gameover-title">Victory!</h2>
+      <p class="modal-sub" id="gameover-sub">You checkmated the opponent!</p>
+      <div class="end-actions">
+        <button class="action-btn" id="gameover-undo-btn" style="background:#ff9f1c; color:#1a1a2e;" onclick="handleGameOverUndo()">
+          ↩️ Undo Last Move & Keep Playing
+        </button>
+        <button class="action-btn" id="gameover-new-btn" style="background:#06d6a0; color:#1a1a2e;" onclick="handleGameOverNew()">
+          🎮 Play New Game
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="comic-popup">POW!</div>
+  <div id="hint">Tap 💡 Hint for smart suggestions • Check out the new 🐴 Horse Knights & 🥂 Ivory/Sapphire theme!</div>
+
+  <script>
+    // --- 0. CARTOON SOUND SYNTHESIZER WITH MASTER VOLUME CONTROL ---
+    let audioCtx = null;
+    let masterGain = null;
+    let masterVolume = 0.5;
+    let lastUnmutedVolume = 0.5;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = masterVolume;
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function setMasterVolume(val) {
+      masterVolume = parseFloat(val);
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(masterVolume, audioCtx.currentTime);
+      }
+      const icon = document.getElementById('mute-icon');
+      icon.innerText = masterVolume === 0 ? '🔇' : (masterVolume < 0.45 ? '🔉' : '🔊');
+    }
+
+    function playCartoonSFX(type) {
+      if (masterVolume <= 0.001) return;
+      initAudio();
+      const now = audioCtx.currentTime;
+
+      if (type === 'select') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(680, now + 0.09);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.09);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(now); osc.stop(now + 0.09);
+      } else if (type === 'hint') {
+        [587.33, 880].forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.08);
+          gain.gain.setValueAtTime(0.25, now + i * 0.08);
+          gain.gain.linearRampToValueAtTime(0.01, now + i * 0.08 + 0.16);
+          osc.connect(gain); gain.connect(masterGain);
+          osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.16);
+        });
+      } else if (type === 'jump') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(520, now + 0.22);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.24);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(now); osc.stop(now + 0.24);
+      } else if (type === 'undo') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(580, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.2);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(now); osc.stop(now + 0.22);
+      } else if (type === 'land') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.08);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'pow') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.28);
+        gain.gain.setValueAtTime(0.42, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.28);
+        osc.connect(gain); gain.connect(masterGain);
+        osc.start(now); osc.stop(now + 0.28);
+      } else if (type === 'check') {
+        [440, 587.33].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.11);
+          gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.11 + 0.14);
+          osc.connect(gain); gain.connect(masterGain);
+          osc.start(now + idx * 0.11); osc.stop(now + idx * 0.11 + 0.14);
+        });
+      } else if (type === 'win') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.28, now + idx * 0.12);
+          gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.12 + 0.28);
+          osc.connect(gain); gain.connect(masterGain);
+          osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.28);
+        });
+      } else if (type === 'lose') {
+        [392.0, 369.99, 349.23, 311.13].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+          gain.gain.setValueAtTime(0.2, now + idx * 0.16);
+          gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.16 + 0.22);
+          osc.connect(gain); gain.connect(masterGain);
+          osc.start(now + idx * 0.16); osc.stop(now + idx * 0.16 + 0.22);
+        });
+      }
+    }
+
+    // --- 1. SCENE, CAMERA & RENDERER ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 11.8, 10.8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI / 2.2;
+    controls.minDistance = 7;
+    controls.maxDistance = 26;
+    controls.target.set(0, 0, 0);
+
+    // --- 2. GLITCH-FREE CEL SHADING & LIGHTING ---
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffd166, 0.65);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(7, 15, 9);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 1;
+    dirLight.shadow.camera.far = 35;
+    const d = 10.5;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0015;
+    scene.add(dirLight);
+
+    const gradCanvas = document.createElement('canvas');
+    gradCanvas.width = 4;
+    gradCanvas.height = 1;
+    const ctx = gradCanvas.getContext('2d');
+    ctx.fillStyle = '#666666'; ctx.fillRect(0, 0, 1, 1);
+    ctx.fillStyle = '#b0b0b0'; ctx.fillRect(1, 0, 1, 1);
+    ctx.fillStyle = '#e8e8e8'; ctx.fillRect(2, 0, 1, 1);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(3, 0, 1, 1);
+    const gradientMap = new THREE.CanvasTexture(gradCanvas);
+    gradientMap.minFilter = THREE.NearestFilter;
+    gradientMap.magFilter = THREE.NearestFilter;
+
+    function makeToonMat(hexColor) {
+      return new THREE.MeshToonMaterial({ color: hexColor, gradientMap: gradientMap });
+    }
+
+    const outlineMat = new THREE.MeshBasicMaterial({
+      color: 0x1a1a2e,
+      side: THREE.BackSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 2,
+      polygonOffsetUnits: 2
+    });
+
+    function addOutlinedMesh(parent, geo, mat, x, y, z, scaleOutline = 1.05) {
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      const out = new THREE.Mesh(geo, outlineMat);
+      out.scale.setScalar(scaleOutline);
+      out.raycast = () => {};
+      mesh.add(out);
+      parent.add(mesh);
+      return mesh;
+    }
+
+    function addPart(parent, geo, mat, yPos, zPos = 0, rotX = 0, xPos = 0, rotZ = 0) {
+      geo.computeBoundingBox();
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(xPos, yPos, zPos);
+      mesh.rotation.set(rotX, 0, rotZ);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      const outline = new THREE.Mesh(geo, outlineMat);
+      outline.scale.set(1.07, 1.07, 1.07);
+      outline.raycast = () => {};
+      mesh.add(outline);
+
+      parent.add(mesh);
+      return mesh;
+    }
+
+    // --- 3. BUILD THE COMIC CHESSBOARD & 4 STAGE ENVIRONMENTS ---
+    const boardGroup = new THREE.Group();
+    scene.add(boardGroup);
+
+    const interactables = [];
+    const tileMeshes = {};
+    const lightTileMat = makeToonMat(0xfff8e7);
+    const darkTileMat = makeToonMat(0x7b6cf6);
+    const selectedTileMat = makeToonMat(0xffbe0b);
+    const hintTileMat = makeToonMat(0x00f5d4);
+
+    const borderGeo = new THREE.BoxGeometry(8.9, 0.45, 8.9);
+    const borderMat = makeToonMat(0x1a1a2e);
+    const borderMesh = new THREE.Mesh(borderGeo, borderMat);
+    borderMesh.position.y = -0.26;
+    borderMesh.castShadow = true;
+    borderMesh.receiveShadow = true;
+    boardGroup.add(borderMesh);
+
+    const files = ['a','b','c','d','e','f','g','h'];
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const sqName = files[c] + (8 - r);
+        const isLight = (r + c) % 2 === 0;
+        const baseMat = isLight ? lightTileMat : darkTileMat;
+        const tile = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.24, 0.96), baseMat);
+        tile.position.set(c - 3.5, 0, r - 3.5);
+        tile.receiveShadow = true;
+        tile.userData = { square: sqName, baseMat: baseMat };
+        boardGroup.add(tile);
+        tileMeshes[sqName] = tile;
+        interactables.push(tile);
+      }
+    }
+
+    // --- STAGE A: 3D WOODEN TABLE ---
+    function createWoodTexture() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const wCtx = c.getContext('2d');
+      wCtx.fillStyle = '#c88a55';
+      wCtx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 8; i++) {
+        const y = i * 64;
+        wCtx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+        wCtx.fillRect(0, y, 512, 64);
+        wCtx.strokeStyle = '#6f4222'; wCtx.lineWidth = 4;
+        wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(512, y); wCtx.stroke();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    const tableGroup = new THREE.Group();
+    const tableTopMat = new THREE.MeshToonMaterial({ color: 0xe6b88a, map: createWoodTexture(), gradientMap });
+    const tableRimMat = makeToonMat(0x7f4f24);
+    addOutlinedMesh(tableGroup, new THREE.CylinderGeometry(8.6, 8.2, 0.75, 36), tableTopMat, 0, -0.88, 0, 1.03);
+    const rimMesh = new THREE.Mesh(new THREE.TorusGeometry(8.45, 0.26, 14, 36), tableRimMat);
+    rimMesh.rotation.x = Math.PI / 2; rimMesh.position.y = -0.68;
+    tableGroup.add(rimMesh);
+    const legGeo = new THREE.CylinderGeometry(0.65, 0.42, 7.5, 16);
+    [[-4.4, -4.4], [4.4, -4.4], [-4.4, 4.4], [4.4, 4.4]].forEach(([lx, lz]) => {
+      addOutlinedMesh(tableGroup, legGeo, tableRimMat, lx, -4.8, lz, 1.06);
+    });
+    tableGroup.visible = false;
+    scene.add(tableGroup);
+
+    // --- STAGE B: FLOATING GRASS ISLAND ---
+    const islandGroup = new THREE.Group();
+    const grassMat = makeToonMat(0x52b788);
+    const rockMat  = makeToonMat(0xb08968);
+    const cloudMat = makeToonMat(0xffffff);
+
+    addOutlinedMesh(islandGroup, new THREE.CylinderGeometry(10.2, 9.3, 0.75, 14), grassMat, 0, -0.84, 0, 1.03);
+    addOutlinedMesh(islandGroup, new THREE.CylinderGeometry(9.0, 5.2, 2.5, 12), rockMat, 0, -2.4, 0, 1.04);
+    addOutlinedMesh(islandGroup, new THREE.ConeGeometry(5.0, 3.0, 9), rockMat, 0, -5.0, 0, 1.05).rotation.x = Math.PI;
+
+    [
+      [-6.8, -6.5, 1.0],
+      [ 7.0, -6.4, 1.1],
+      [-6.6,  6.8, 0.95],
+      [ 6.9,  6.6, 1.05],
+      [-8.3,  0.4, 0.85],
+      [ 8.2, -0.5, 0.9]
+    ].forEach(([tx, tz, s]) => {
+      addOutlinedMesh(islandGroup, new THREE.CylinderGeometry(0.2 * s, 0.28 * s, 0.75 * s, 8), tableRimMat, tx, -0.15, tz, 1.08);
+      addOutlinedMesh(islandGroup, new THREE.SphereGeometry(0.72 * s, 14, 14), grassMat, tx, 0.48 * s, tz, 1.06);
+      addOutlinedMesh(islandGroup, new THREE.SphereGeometry(0.52 * s, 12, 12), grassMat, tx, 1.02 * s, tz, 1.06);
+    });
+
+    const clouds = [];
+    for (let i = 0; i < 4; i++) {
+      const cGroup = new THREE.Group();
+      addOutlinedMesh(cGroup, new THREE.SphereGeometry(0.7, 12, 12), cloudMat, 0, 0, 0, 1.05);
+      addOutlinedMesh(cGroup, new THREE.SphereGeometry(0.5, 12, 12), cloudMat, 0.55, -0.1, 0.1, 1.05);
+      addOutlinedMesh(cGroup, new THREE.SphereGeometry(0.5, 12, 12), cloudMat, -0.55, -0.1, -0.1, 1.05);
+      const angle = (i / 4) * Math.PI * 2;
+      cGroup.position.set(Math.cos(angle) * 11.8, -1.2 + (i % 2) * 0.8, Math.sin(angle) * 11.8);
+      cGroup.userData = { baseAngle: angle, speed: 0.16 + i * 0.03 };
+      islandGroup.add(cGroup);
+      clouds.push(cGroup);
+    }
+    islandGroup.visible = false;
+    scene.add(islandGroup);
+
+    // --- STAGE C: CASTLE COURTYARD ---
+    const castleGroup = new THREE.Group();
+    const stoneMat = makeToonMat(0x8d99ae);
+    const darkStoneMat = makeToonMat(0x6c757d);
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0xff9f1c });
+    addOutlinedMesh(castleGroup, new THREE.BoxGeometry(13.6, 0.9, 13.6), stoneMat, 0, -0.92, 0, 1.02);
+    const towerFlames = [];
+    [[-6.3, -6.3], [6.3, -6.3], [-6.3, 6.3], [6.3, 6.3]].forEach(([cx, cz]) => {
+      addOutlinedMesh(castleGroup, new THREE.CylinderGeometry(1.15, 1.3, 2.4, 12), darkStoneMat, cx, -0.1, cz, 1.04);
+      addOutlinedMesh(castleGroup, new THREE.CylinderGeometry(1.3, 1.2, 0.4, 8), stoneMat, cx, 1.2, cz, 1.05);
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.85, 8), flameMat);
+      flame.position.set(cx, 1.75, cz);
+      castleGroup.add(flame);
+      towerFlames.push(flame);
+    });
+    castleGroup.visible = false;
+    scene.add(castleGroup);
+
+    // --- 4. SQUAD COLOR THEMES (WITH OPTION 1: IVORY & SLATE SAPPHIRE) & CARTOON HORSE ---
+    const SQUAD_SKINS = {
+      mint:  {
+        wHex: 0x06d6a0, bHex: 0xef476f,
+        wName: 'Mint',  bName: 'Neon',
+        wIcon: '🟢', bIcon: '🌸',
+        wCss: '#06d6a0', bCss: '#ef476f',
+        wText: '#1a1a2e', bText: '#ffffff'
+      },
+      royal: {
+        // Option 1: Soothing Classic Ivory & Slate Sapphire
+        wHex: 0xF3E5AB, bHex: 0x3D5A80,
+        wName: 'Ivory', bName: 'Sapphire',
+        wIcon: '🥂', bIcon: '🛡️',
+        wCss: '#F3E5AB', bCss: '#3D5A80',
+        wText: '#1a1a2e', bText: '#ffffff'
+      },
+      cyber: {
+        wHex: 0x00bbf9, bHex: 0xf15bb5,
+        wName: 'Cyber', bName: 'Berry',
+        wIcon: '⚡', bIcon: '🍓',
+        wCss: '#00bbf9', bCss: '#f15bb5',
+        wText: '#1a1a2e', bText: '#ffffff'
+      }
+    };
+    let currentSkinKey = 'mint';
+
+    const whiteMat = makeToonMat(SQUAD_SKINS.mint.wHex);
+    const blackMat = makeToonMat(SQUAD_SKINS.mint.bHex);
+    const goldMat  = makeToonMat(0xffbe0b);
+    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x1a1a2e });
+
+    function addCuteEyes(group, y, z, dir, spread = 0.09) {
+      [-spread, spread].forEach(xOffset => {
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 10), eyeWhiteMat);
+        eye.position.set(xOffset, y, z * dir);
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 8), pupilMat);
+        pupil.position.set(0, 0, 0.035 * dir);
+        eye.add(pupil);
+        group.add(eye);
+      });
+    }
+
+    function createCartoonPiece(type, color) {
+      const group = new THREE.Group();
+      const mat = color === 'w' ? whiteMat : blackMat;
+      const dir = color === 'w' ? -1 : 1;
+
+      // Pedestal Base
+      addPart(group, new THREE.CylinderGeometry(0.35, 0.41, 0.2, 24), mat, 0.1);
+
+      if (type === 'p') {
+        addPart(group, new THREE.CylinderGeometry(0.2, 0.32, 0.38, 24), mat, 0.35);
+        addPart(group, new THREE.SphereGeometry(0.25, 24, 24), mat, 0.68);
+        addCuteEyes(group, 0.7, 0.21, dir);
+      } else if (type === 'r') {
+        addPart(group, new THREE.CylinderGeometry(0.3, 0.34, 0.58, 20), mat, 0.45);
+        addPart(group, new THREE.CylinderGeometry(0.35, 0.3, 0.22, 12), mat, 0.82);
+        addCuteEyes(group, 0.55, 0.29, dir);
+      } else if (type === 'n') {
+        // --- NEW SCULPTED CARTOON HORSE KNIGHT (NO MORE SEAHORSE!) ---
+        // 1. Forward-tilted horse chest & arched neck
+        addPart(group, new THREE.CylinderGeometry(0.21, 0.33, 0.52, 20), mat, 0.42, 0.04 * dir, dir * 0.24);
+        // 2. Sculpted Horse Cranium / Cheekbones
+        addPart(group, new THREE.SphereGeometry(0.23, 20, 20), mat, 0.76, 0.09 * dir);
+        // 3. Tapered, downward-angled Horse Muzzle / Jaw (instead of a horizontal tube)
+        addPart(group, new THREE.BoxGeometry(0.24, 0.21, 0.34), mat, 0.70, 0.26 * dir, dir * 0.34);
+        // 4. Two Pointed Horse Ears on top of the head
+        [-0.1, 0.1].forEach(earX => {
+          addPart(group, new THREE.ConeGeometry(0.065, 0.22, 12), mat, 1.02, 0.04 * dir, dir * 0.18, earX, earX * -0.5);
+        });
+        // 5. Golden Cartoon Horse Mane running down the back of the head & neck
+        addPart(group, new THREE.BoxGeometry(0.09, 0.18, 0.14), goldMat, 0.90, -0.09 * dir, dir * 0.2);
+        addPart(group, new THREE.BoxGeometry(0.09, 0.22, 0.15), goldMat, 0.68, -0.14 * dir, dir * 0.24);
+        addPart(group, new THREE.BoxGeometry(0.09, 0.20, 0.14), goldMat, 0.46, -0.17 * dir, dir * 0.2);
+        // 6. Cute Horse Nostrils on the front of the muzzle
+        [-0.055, 0.055].forEach(nx => {
+          const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), pupilMat);
+          nostril.position.set(nx, 0.69, 0.42 * dir);
+          group.add(nostril);
+        });
+        // 7. Expressive Horse Eyes
+        addCuteEyes(group, 0.82, 0.25, dir, 0.11);
+      } else if (type === 'b') {
+        addPart(group, new THREE.CylinderGeometry(0.18, 0.33, 0.55, 24), mat, 0.44);
+        addPart(group, new THREE.SphereGeometry(0.24, 24, 24), mat, 0.78);
+        addPart(group, new THREE.SphereGeometry(0.1, 16, 16), goldMat, 1.07);
+        addCuteEyes(group, 0.8, 0.21, dir);
+      } else if (type === 'q') {
+        addPart(group, new THREE.CylinderGeometry(0.22, 0.35, 0.68, 24), mat, 0.5);
+        addPart(group, new THREE.SphereGeometry(0.25, 24, 24), mat, 0.9);
+        addPart(group, new THREE.TorusGeometry(0.18, 0.06, 12, 24), goldMat, 1.12, 0, Math.PI / 2);
+        addCuteEyes(group, 0.92, 0.22, dir);
+      } else if (type === 'k') {
+        addPart(group, new THREE.CylinderGeometry(0.24, 0.36, 0.74, 24), mat, 0.52);
+        addPart(group, new THREE.SphereGeometry(0.26, 24, 24), mat, 0.96);
+        addPart(group, new THREE.TorusGeometry(0.2, 0.065, 12, 24), goldMat, 1.18, 0, Math.PI / 2);
+        addPart(group, new THREE.SphereGeometry(0.12, 16, 16), goldMat, 1.32);
+        addCuteEyes(group, 0.98, 0.23, dir);
+      }
+
+      return group;
+    }
+
+    // --- 5. GAME STATE, RESUME MENU, TIMER & TROPHY SCOREBOARD ---
+    const game = new Chess();
+    const pieceMeshes = {};
+    const highlightMeshes = [];
+    const flyingDebris = [];
+    const activeJumpers = [];
+    const particles = [];
+
+    let gameMode = 'ai';
+    let aiDifficulty = 'medium';
+    let envType = 'void';
+    const ENV_ORDER = ['void', 'table', 'island', 'castle'];
+    const ENV_LABELS = { void: '🌌 Void', table: '🪵 Table', island: '🏝️ Island', castle: '🏰 Castle' };
+
+    let isDarkMode = false;
+    let playerColor = 'w';
+    let hasStartedAnyGame = false;
+    let selectedSquare = null;
+    let hintSquares = [];
+    let pendingPromotion = null;
+    let isAnimating = false;
+    let isTopDown = false;
+    let aiTimeout = null;
+    let gameOverTimeout = null;
+    let desiredCamPos = null;
+
+    let timerSettingSeconds = 0;
+    let timeRemaining = { w: 0, b: 0 };
+    let clockInterval = null;
+    let isMatchActive = false;
+
+    window.resumeCurrentGame = function() {
+      if (!hasStartedAnyGame) return;
+      playCartoonSFX('select');
+      document.getElementById('team-modal').style.display = 'none';
+      if (gameMode === 'ai' && !game.game_over() && game.turn() !== playerColor && !isAnimating) {
+        if (aiTimeout) clearTimeout(aiTimeout);
+        aiTimeout = setTimeout(makeAIMove, 400);
+      }
+    };
+
+    window.handleModalBackdropClick = function(e) {
+      if (e.target.id === 'team-modal' && hasStartedAnyGame) {
+        resumeCurrentGame();
+      }
+    };
+
+    window.setEnvironment = function(type) {
+      envType = type;
+      tableGroup.visible  = (type === 'table');
+      islandGroup.visible = (type === 'island');
+      castleGroup.visible = (type === 'castle');
+
+      ENV_ORDER.forEach(k => {
+        const el = document.getElementById('env-' + k);
+        if (el) el.classList.toggle('active', k === type);
+      });
+
+      const envBtn = document.getElementById('env-btn');
+      if (envBtn) envBtn.innerText = ENV_LABELS[type];
+    };
+
+    window.setSquadSkin = function(skinKey) {
+      currentSkinKey = skinKey;
+      const skin = SQUAD_SKINS[skinKey];
+      whiteMat.color.setHex(skin.wHex);
+      blackMat.color.setHex(skin.bHex);
+
+      ['mint', 'royal', 'cyber'].forEach(k => {
+        const el = document.getElementById('skin-' + k);
+        if (el) el.classList.toggle('active', k === skinKey);
+      });
+
+      const btnW = document.getElementById('btn-pick-w');
+      const btnB = document.getElementById('btn-pick-b');
+      document.getElementById('icon-pick-w').innerText = skin.wIcon;
+      document.getElementById('name-pick-w').innerText = skin.wName.toUpperCase();
+      btnW.style.background = skin.wCss;
+      btnW.style.color = skin.wText;
+
+      document.getElementById('icon-pick-b').innerText = skin.bIcon;
+      document.getElementById('name-pick-b').innerText = skin.bName.toUpperCase();
+      btnB.style.background = skin.bCss;
+      btnB.style.color = skin.bText;
+
+      document.getElementById('w-team-dot').innerText = skin.wIcon;
+      document.getElementById('b-team-dot').innerText = skin.bIcon;
+
+      // Also adjust board dark tile color slightly when in Ivory/Sapphire mode for maximum eye relaxation!
+      applyBoardThemeColors();
+      updateTurnUI();
+    };
+
+    function applyBoardThemeColors() {
+      if (isDarkMode) {
+        lightTileMat.color.setHex(0xdce1f0);
+        darkTileMat.color.setHex(currentSkinKey === 'royal' ? 0x2b3a55 : 0x4f46e5);
+      } else {
+        lightTileMat.color.setHex(0xfff8e7);
+        darkTileMat.color.setHex(currentSkinKey === 'royal' ? 0x8da9c4 : 0x7b6cf6);
+      }
+    }
+
+    window.setTimerSetting = function(seconds) {
+      timerSettingSeconds = seconds;
+      [0, 180, 300, 600].forEach(s => {
+        const el = document.getElementById('time-' + s);
+        if (el) el.classList.toggle('active', s === seconds);
+      });
+    };
+
+    function formatClock(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateClockUI() {
+      const wClock = document.getElementById('w-clock');
+      const bClock = document.getElementById('b-clock');
+      if (timerSettingSeconds === 0) {
+        wClock.style.display = 'none';
+        bClock.style.display = 'none';
+        return;
+      }
+      wClock.style.display = 'inline-block';
+      bClock.style.display = 'inline-block';
+      wClock.innerText = formatClock(timeRemaining.w);
+      bClock.innerText = formatClock(timeRemaining.b);
+      wClock.style.background = game.turn() === 'w' ? '#ffbe0b' : '#e2e8f0';
+      bClock.style.background = game.turn() === 'b' ? '#ffbe0b' : '#e2e8f0';
+    }
+
+    function startMatchClock() {
+      if (clockInterval) clearInterval(clockInterval);
+      if (timerSettingSeconds <= 0) {
+        updateClockUI();
+        return;
+      }
+      timeRemaining = { w: timerSettingSeconds, b: timerSettingSeconds };
+      updateClockUI();
+      clockInterval = setInterval(() => {
+        if (!isMatchActive || isAnyModalOpen() || game.game_over()) return;
+        const turn = game.turn();
+        timeRemaining[turn] = Math.max(0, timeRemaining[turn] - 1);
+        updateClockUI();
+        if (timeRemaining[turn] === 0) {
+          isMatchActive = false;
+          clearInterval(clockInterval);
+          playCartoonSFX('lose');
+          showComicPopup('TIME UP!');
+          setTimeout(() => showGameOverModal(turn), 600);
+        }
+      }, 1000);
+    }
+
+    const PIECE_ICONS = { q: '👑', r: '🏰', b: '🔮', n: '🐴', p: '♟️' };
+    const PIECE_VALUES = { q: 9, r: 5, b: 3, n: 3, p: 1 };
+
+    function updateTrophyBar() {
+      const history = game.history({ verbose: true });
+      const capturedByW = [];
+      const capturedByB = [];
+
+      history.forEach(m => {
+        if (m.captured) {
+          if (m.color === 'w') capturedByW.push(m.captured);
+          else capturedByB.push(m.captured);
+        }
+      });
+
+      const order = ['q', 'r', 'b', 'n', 'p'];
+      capturedByW.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+      capturedByB.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+      let wScore = 0, bScore = 0;
+      const board = game.board();
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && p.type !== 'k') {
+            if (p.color === 'w') wScore += PIECE_VALUES[p.type];
+            else bScore += PIECE_VALUES[p.type];
+          }
+        }
+      }
+      const diff = wScore - bScore;
+
+      const wIcons = capturedByW.map(t => PIECE_ICONS[t]).join('');
+      const bIcons = capturedByB.map(t => PIECE_ICONS[t]).join('');
+
+      document.getElementById('w-captured').innerText =
+        (wIcons || '—') + (diff > 0 ? ` (+${diff})` : '');
+      document.getElementById('b-captured').innerText =
+        (bIcons || '—') + (diff < 0 ? ` (+${Math.abs(diff)})` : '');
+    }
+
+    window.setDarkMode = function(dark) {
+      isDarkMode = dark;
+      document.body.classList.toggle('dark-mode', dark);
+
+      const lightPill = document.getElementById('theme-light');
+      const darkPill = document.getElementById('theme-dark');
+      if (lightPill) lightPill.classList.toggle('active', !dark);
+      if (darkPill) darkPill.classList.toggle('active', dark);
+
+      const themeBtn = document.getElementById('theme-btn');
+      if (themeBtn) {
+        themeBtn.innerText = dark ? '🌙 Dark' : '☀️ Light';
+        themeBtn.style.background = dark ? '#7b6cf6' : '#b8c1ec';
+        themeBtn.style.color = dark ? '#ffffff' : '#1a1a2e';
+      }
+
+      if (dark) {
+        hemiLight.color.setHex(0xb8c1ec);
+        hemiLight.groundColor.setHex(0x1f243d);
+        hemiLight.intensity = 0.58;
+        dirLight.color.setHex(0xe2e8f0);
+        dirLight.intensity = 0.78;
+        tableTopMat.color.setHex(0xa47551);
+        tableRimMat.color.setHex(0x4a2c11);
+      } else {
+        hemiLight.color.setHex(0xffffff);
+        hemiLight.groundColor.setHex(0xffd166);
+        hemiLight.intensity = 0.65;
+        dirLight.color.setHex(0xffffff);
+        dirLight.intensity = 0.85;
+        tableTopMat.color.setHex(0xe6b88a);
+        tableRimMat.color.setHex(0x7f4f24);
+      }
+      applyBoardThemeColors();
+    };
+
+    window.setMode = function(mode) {
+      gameMode = mode;
+      document.getElementById('mode-ai').classList.toggle('active', mode === 'ai');
+      document.getElementById('mode-2p').classList.toggle('active', mode === '2p');
+      document.getElementById('diff-section').style.display = mode === 'ai' ? 'flex' : 'none';
+      document.getElementById('start-label').innerText = mode === 'ai'
+        ? '5. Start New Game As:'
+        : '5. Tap Either Squad to Start New 2P Match:';
+      updateTurnUI();
+      updateUndoButtonState();
+    };
+
+    window.setDiff = function(diff) {
+      aiDifficulty = diff;
+      document.getElementById('diff-easy').classList.toggle('active', diff === 'easy');
+      document.getElementById('diff-med').classList.toggle('active', diff === 'medium');
+      document.getElementById('diff-hard').classList.toggle('active', diff === 'hard');
+    };
+
+    function isAnyModalOpen() {
+      return (
+        document.getElementById('team-modal').style.display !== 'none' ||
+        document.getElementById('promo-modal').style.display !== 'none' ||
+        document.getElementById('gameover-modal').style.display !== 'none'
+      );
+    }
+
+    function squareToPos(sq) {
+      const c = files.indexOf(sq[0]);
+      const r = 8 - parseInt(sq[1]);
+      return new THREE.Vector3(c - 3.5, 0.12, r - 3.5);
+    }
+
+    function assignSquareToPiece(meshGroup, sq, color, type) {
+      meshGroup.userData = { square: sq, color: color, type: type };
+      meshGroup.traverse(child => {
+        if (child.isMesh) child.userData.square = sq;
+      });
+    }
+
+    function initBoardPieces() {
+      Object.values(pieceMeshes).forEach(m => scene.remove(m));
+      for (let k in pieceMeshes) delete pieceMeshes[k];
+
+      const board = game.board();
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p) {
+            const sq = files[c] + (8 - r);
+            const mesh = createCartoonPiece(p.type, p.color);
+            mesh.position.copy(squareToPos(sq));
+            assignSquareToPiece(mesh, sq, p.color, p.type);
+            scene.add(mesh);
+            pieceMeshes[sq] = mesh;
+          }
+        }
+      }
+      updateTrophyBar();
+    }
+    initBoardPieces();
+
+    function positionCameraForSide(sideColor, smooth = false) {
+      const zSide = sideColor === 'w' ? 1 : -1;
+      const targetVec = isTopDown
+        ? new THREE.Vector3(0, 15.5, 0.01 * zSide)
+        : new THREE.Vector3(0, 11.8, 10.8 * zSide);
+
+      if (smooth) {
+        desiredCamPos = targetVec;
+      } else {
+        desiredCamPos = null;
+        camera.position.copy(targetVec);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+    }
+
+    function updateUndoButtonState() {
+      const undoBtn = document.getElementById('undo-btn');
+      const histLen = game.history().length;
+      if (gameMode === 'ai') {
+        const minMoves = playerColor === 'b' ? 2 : 1;
+        undoBtn.disabled = histLen < minMoves;
+      } else {
+        undoBtn.disabled = histLen === 0;
+      }
+    }
+
+    function clearHintHighlights() {
+      hintSquares.forEach(sq => {
+        if (tileMeshes[sq] && sq !== selectedSquare) {
+          tileMeshes[sq].material = tileMeshes[sq].userData.baseMat;
+        }
+      });
+      hintSquares = [];
+    }
+
+    function showSmartHint() {
+      if (isAnimating || game.game_over()) return;
+      if (gameMode === 'ai' && game.turn() !== playerColor) return;
+
+      clearSelectionAndHighlights();
+      const bestMove = computeBestMoveForColor(game.turn(), 'hard');
+      if (!bestMove) return;
+
+      playCartoonSFX('hint');
+      showComicPopup('IDEA!');
+      hintSquares = [bestMove.from, bestMove.to];
+      hintSquares.forEach(sq => {
+        if (tileMeshes[sq]) tileMeshes[sq].material = hintTileMat;
+      });
+      selectPieceOnSquare(bestMove.from, true);
+    }
+
+    function undoLastDecision() {
+      if (aiTimeout) { clearTimeout(aiTimeout); aiTimeout = null; }
+      if (gameOverTimeout) { clearTimeout(gameOverTimeout); gameOverTimeout = null; }
+
+      document.getElementById('gameover-modal').style.display = 'none';
+      document.getElementById('promo-modal').style.display = 'none';
+      pendingPromotion = null;
+      isMatchActive = true;
+
+      const histLen = game.history().length;
+      if (histLen === 0) return;
+
+      activeJumpers.forEach(j => scene.remove(j.mesh));
+      activeJumpers.length = 0;
+      flyingDebris.forEach(d => scene.remove(d.mesh));
+      flyingDebris.length = 0;
+      isAnimating = false;
+      clearSelectionAndHighlights();
+
+      if (gameMode === 'ai') {
+        if (game.turn() === playerColor) {
+          game.undo();
+          game.undo();
+        } else {
+          game.undo();
+        }
+      } else {
+        game.undo();
+        positionCameraForSide(game.turn(), true);
+      }
+
+      playCartoonSFX('undo');
+      showComicPopup('REWIND!');
+      initBoardPieces();
+      updateTurnUI();
+      updateUndoButtonState();
+    }
+
+    window.handleGameOverUndo = function() {
+      if (timerSettingSeconds > 0 && (timeRemaining.w === 0 || timeRemaining.b === 0)) {
+        timeRemaining.w = Math.max(timeRemaining.w, 60);
+        timeRemaining.b = Math.max(timeRemaining.b, 60);
+        startMatchClock();
+      }
+      undoLastDecision();
+    };
+
+    window.handleGameOverNew = function() {
+      playCartoonSFX('select');
+      document.getElementById('gameover-modal').style.display = 'none';
+      openSetupMenu();
+    };
+
+    function openSetupMenu() {
+      const canResume = hasStartedAnyGame && !game.game_over();
+      document.getElementById('resume-game-btn').style.display = canResume ? 'block' : 'none';
+      document.getElementById('close-menu-x').style.display = canResume ? 'flex' : 'none';
+      document.getElementById('team-modal').style.display = 'flex';
+    }
+
+    function showGameOverModal(timeoutLoserColor = null) {
+      isMatchActive = false;
+      const modal = document.getElementById('gameover-modal');
+      const iconEl = document.getElementById('gameover-icon');
+      const titleEl = document.getElementById('gameover-title');
+      const subEl = document.getElementById('gameover-sub');
+      const undoBtn = document.getElementById('gameover-undo-btn');
+      const newBtn = document.getElementById('gameover-new-btn');
+      const skin = SQUAD_SKINS[currentSkinKey];
+
+      const loserColor = timeoutLoserColor || game.turn();
+
+      if (timeoutLoserColor || game.in_checkmate()) {
+        if (gameMode === 'ai') {
+          const playerWon = (loserColor !== playerColor);
+          if (playerWon) {
+            iconEl.innerText = '🏆';
+            titleEl.innerText = 'You Won!';
+            subEl.innerText = timeoutLoserColor ? 'The AI ran out of time!' : 'Awesome strategy! Ready for a new match?';
+            newBtn.style.background = '#06d6a0';
+            undoBtn.style.display = 'none';
+          } else {
+            iconEl.innerText = '💥';
+            titleEl.innerText = timeoutLoserColor ? 'Out of Time!' : 'You Lost!';
+            subEl.innerText = 'Want to undo your last move and try a different play?';
+            undoBtn.style.display = 'block';
+            undoBtn.innerText = '↩️ Undo Last Move & Keep Playing';
+            newBtn.style.background = '#ffbe0b';
+          }
+        } else {
+          const winnerName = loserColor === 'w' ? `${skin.bName} (P2)` : `${skin.wName} (P1)`;
+          iconEl.innerText = '🏆';
+          titleEl.innerText = winnerName + ' Wins!';
+          subEl.innerText = timeoutLoserColor ? 'Won on time!' : 'Checkmate! Undo final move or start fresh:';
+          undoBtn.style.display = 'block';
+          undoBtn.innerText = '↩️ Undo Final Move';
+          newBtn.style.background = '#06d6a0';
+        }
+      } else {
+        iconEl.innerText = '🤝';
+        titleEl.innerText = 'Draw Game!';
+        subEl.innerText = 'No legal moves left! Undo to keep playing or start a new game:';
+        undoBtn.style.display = 'block';
+        undoBtn.innerText = '↩️ Undo Last Move';
+        newBtn.style.background = '#06d6a0';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    window.startNewGame = function(chosenColor) {
+      initAudio();
+      playCartoonSFX('select');
+      if (aiTimeout) clearTimeout(aiTimeout);
+      if (gameOverTimeout) clearTimeout(gameOverTimeout);
+      playerColor = chosenColor;
+      hasStartedAnyGame = true;
+      document.getElementById('team-modal').style.display = 'none';
+      document.getElementById('promo-modal').style.display = 'none';
+      document.getElementById('gameover-modal').style.display = 'none';
+      pendingPromotion = null;
+      isMatchActive = true;
+
+      game.reset();
+      clearSelectionAndHighlights();
+      activeJumpers.length = 0;
+      isAnimating = false;
+      isTopDown = false;
+
+      initBoardPieces();
+      const initialViewSide = gameMode === '2p' ? 'w' : playerColor;
+      positionCameraForSide(initialViewSide, false);
+      updateTurnUI();
+      updateUndoButtonState();
+      startMatchClock();
+
+      if (gameMode === 'ai' && playerColor === 'b') {
+        aiTimeout = setTimeout(makeAIMove, 650);
+      }
+    };
+
+    function clearSelectionAndHighlights() {
+      clearHintHighlights();
+      if (selectedSquare) {
+        if (tileMeshes[selectedSquare]) {
+          tileMeshes[selectedSquare].material = tileMeshes[selectedSquare].userData.baseMat;
+        }
+        if (pieceMeshes[selectedSquare]) {
+          pieceMeshes[selectedSquare].position.y = 0.12;
+          pieceMeshes[selectedSquare].rotation.y = 0;
+          pieceMeshes[selectedSquare].scale.set(1, 1, 1);
+        }
+      }
+      selectedSquare = null;
+      highlightMeshes.forEach(m => scene.remove(m));
+      highlightMeshes.length = 0;
+    }
+
+    function selectPieceOnSquare(sq, fromHint = false) {
+      if (!fromHint) {
+        clearSelectionAndHighlights();
+        playCartoonSFX('select');
+      }
+      selectedSquare = sq;
+      if (!fromHint) tileMeshes[sq].material = selectedTileMat;
+
+      const moves = game.moves({ square: sq, verbose: true });
+      const seenTargets = new Set();
+      moves.forEach(m => {
+        if (seenTargets.has(m.to)) return;
+        seenTargets.add(m.to);
+
+        const isCapture = m.captured || m.flags.includes('e');
+        const geo = new THREE.CylinderGeometry(0.32, 0.32, 0.06, 24);
+        const mat = new THREE.MeshBasicMaterial({
+          color: isCapture ? 0xff0055 : 0xffbe0b
+        });
+        const disc = new THREE.Mesh(geo, mat);
+        const pos = squareToPos(m.to);
+        disc.position.set(pos.x, 0.15, pos.z);
+        disc.userData = { square: m.to };
+        scene.add(disc);
+        highlightMeshes.push(disc);
+      });
+    }
+
+    function spawnBurstParticles(pos) {
+      const colors = [0xffbe0b, 0xef476f, 0x06d6a0, 0xffffff];
+      for (let i = 0; i < 14; i++) {
+        const p = new THREE.Mesh(
+          new THREE.SphereGeometry(0.1, 8, 8),
+          new THREE.MeshBasicMaterial({ color: colors[i % colors.length] })
+        );
+        p.position.copy(pos).add(new THREE.Vector3(0, 0.5, 0));
+        scene.add(p);
+        particles.push({
+          mesh: p,
+          vel: new THREE.Vector3((Math.random() - 0.5) * 7, 3 + Math.random() * 5, (Math.random() - 0.5) * 7),
+          life: 1.0
+        });
+      }
+    }
+
+    function showComicPopup(text) {
+      const el = document.getElementById('comic-popup');
+      el.innerText = text;
+      el.style.transform = 'translate(-50%, -50%) scale(1.1) rotate(-7deg)';
+      setTimeout(() => { el.style.transform = 'translate(-50%, -50%) scale(0)'; }, 700);
+    }
+
+    function isMovePromotion(fromSq, toSq) {
+      const moves = game.moves({ square: fromSq, verbose: true });
+      return moves.some(m => m.to === toSq && (m.flags.includes('p') || m.promotion));
+    }
+
+    window.confirmPromotion = function(pieceType) {
+      document.getElementById('promo-modal').style.display = 'none';
+      if (!pendingPromotion) return;
+      const { from, to } = pendingPromotion;
+      pendingPromotion = null;
+      executeMove(from, to, pieceType);
+    };
+
+    function executeMove(fromSq, toSq, promoType = 'q') {
+      const moveObj = game.move({ from: fromSq, to: toSq, promotion: promoType });
+      if (!moveObj) return;
+
+      clearSelectionAndHighlights();
+      isAnimating = true;
+      updateUndoButtonState();
+      playCartoonSFX('jump');
+
+      const mover = pieceMeshes[fromSq];
+      delete pieceMeshes[fromSq];
+
+      let capturedSq = toSq;
+      if (moveObj.flags.includes('e')) {
+        capturedSq = toSq[0] + fromSq[1];
+      }
+      const capturedMesh = pieceMeshes[capturedSq];
+      if (capturedMesh) {
+        delete pieceMeshes[capturedSq];
+      }
+
+      if (moveObj.flags.includes('k') || moveObj.flags.includes('q')) {
+        const rank = toSq[1];
+        const rookFrom = moveObj.flags.includes('k') ? 'h' + rank : 'a' + rank;
+        const rookTo   = moveObj.flags.includes('k') ? 'f' + rank : 'd' + rank;
+        const rookMesh = pieceMeshes[rookFrom];
+        if (rookMesh) {
+          delete pieceMeshes[rookFrom];
+          pieceMeshes[rookTo] = rookMesh;
+          assignSquareToPiece(rookMesh, rookTo, moveObj.color, 'r');
+          rookMesh.position.copy(squareToPos(rookTo));
+        }
+      }
+
+      const startPos = mover.position.clone();
+      const endPos = squareToPos(toSq);
+
+      activeJumpers.push({
+        mesh: mover,
+        startPos,
+        endPos,
+        progress: 0,
+        capturedMesh,
+        hasTriggeredCapture: false,
+        onComplete: () => {
+          playCartoonSFX('land');
+          if (moveObj.flags.includes('p') || moveObj.promotion) {
+            const chosenType = moveObj.promotion || promoType;
+            scene.remove(mover);
+            const promotedMesh = createCartoonPiece(chosenType, moveObj.color);
+            promotedMesh.position.copy(endPos);
+            assignSquareToPiece(promotedMesh, toSq, moveObj.color, chosenType);
+            scene.add(promotedMesh);
+            pieceMeshes[toSq] = promotedMesh;
+            const names = { q: 'QUEEN!', r: 'ROOK!', b: 'BISHOP!', n: 'KNIGHT!' };
+            showComicPopup(names[chosenType] || 'PROMOTED!');
+          } else {
+            pieceMeshes[toSq] = mover;
+            assignSquareToPiece(mover, toSq, moveObj.color, moveObj.piece);
+          }
+
+          isAnimating = false;
+          updateTrophyBar();
+          updateClockUI();
+          updateTurnUI();
+          updateUndoButtonState();
+
+          if (!game.game_over()) {
+            if (gameMode === '2p') {
+              positionCameraForSide(game.turn(), true);
+            } else if (game.turn() !== playerColor) {
+              aiTimeout = setTimeout(makeAIMove, 420);
+            }
+          }
+        }
+      });
+    }
+
+    // --- SMART AI & HINT ENGINE ---
+    const pieceWeights = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
+
+    function evaluateBoard(targetColor) {
+      let score = 0;
+      const board = game.board();
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p) {
+            const centerBonus = (r >= 2 && r <= 5 && c >= 2 && c <= 5) ? 2 : 0;
+            const val = pieceWeights[p.type] + centerBonus;
+            score += (p.color === targetColor) ? val : -val;
+          }
+        }
+      }
+      return score;
+    }
+
+    function computeBestMoveForColor(activeColor, difficultyLevel) {
+      const moves = game.moves({ verbose: true });
+      if (moves.length === 0) return null;
+
+      let chosen = null;
+      if (difficultyLevel === 'easy') {
+        const captures = moves.filter(m => m.captured);
+        if (captures.length > 0 && Math.random() < 0.4) {
+          chosen = captures[Math.floor(Math.random() * captures.length)];
+        } else {
+          chosen = moves[Math.floor(Math.random() * moves.length)];
+        }
+      } else if (difficultyLevel === 'medium') {
+        let bestScore = -Infinity;
+        moves.forEach(m => {
+          game.move(m);
+          const s = evaluateBoard(activeColor) + (Math.random() * 3 - 1.5);
+          game.undo();
+          if (s > bestScore) { bestScore = s; chosen = m; }
+        });
+      } else {
+        let bestScore = -Infinity;
+        moves.forEach(m => {
+          game.move(m);
+          const oppMoves = game.moves({ verbose: true });
+          let worstReplyScore = Infinity;
+          if (oppMoves.length === 0) {
+            worstReplyScore = game.in_checkmate() ? 9999 : 0;
+          } else {
+            for (let i = 0; i < oppMoves.length; i++) {
+              game.move(oppMoves[i]);
+              const evalScore = evaluateBoard(activeColor);
+              game.undo();
+              if (evalScore < worstReplyScore) worstReplyScore = evalScore;
+            }
+          }
+          game.undo();
+          const finalScore = worstReplyScore + (Math.random() * 1.2);
+          if (finalScore > bestScore) { bestScore = finalScore; chosen = m; }
+        });
+      }
+      return chosen || moves[0];
+    }
+
+    function makeAIMove() {
+      if (game.game_over() || gameMode !== 'ai' || game.turn() === playerColor || isAnyModalOpen()) return;
+      const chosen = computeBestMoveForColor(game.turn(), aiDifficulty);
+      if (!chosen) return;
+      executeMove(chosen.from, chosen.to, chosen.promotion || 'q');
+    }
+
+    function updateTurnUI() {
+      const badge = document.getElementById('turn-badge');
+      const turn = game.turn();
+      const skin = SQUAD_SKINS[currentSkinKey];
+
+      if (game.in_checkmate()) {
+        const playerLost = (gameMode === 'ai' && turn === playerColor);
+        playCartoonSFX(playerLost ? 'lose' : 'win');
+        if (gameMode === '2p') {
+          badge.innerText = turn === 'w' ? `🏆 ${skin.bName} Wins!` : `🏆 ${skin.wName} Wins!`;
+        } else {
+          badge.innerText = playerLost ? '💀 AI Wins!' : '🏆 You Win!';
+        }
+        showComicPopup('CHECKMATE!');
+        gameOverTimeout = setTimeout(() => showGameOverModal(null), 850);
+      } else if (game.in_draw()) {
+        badge.innerText = '🤝 Draw Game!';
+        gameOverTimeout = setTimeout(() => showGameOverModal(null), 750);
+      } else if (game.in_check()) {
+        playCartoonSFX('check');
+        badge.innerText = '⚠️ CHECK!';
+        showComicPopup('CHECK!');
+      } else {
+        if (gameMode === '2p') {
+          badge.innerText = turn === 'w'
+            ? `${skin.wIcon} ${skin.wName} Turn (P1)`
+            : `${skin.bIcon} ${skin.bName} Turn (P2)`;
+        } else {
+          const isPlayer = turn === playerColor;
+          const pText = playerColor === 'w'
+            ? `${skin.wIcon} Your Turn (${skin.wName})`
+            : `${skin.bIcon} Your Turn (${skin.bName})`;
+          const aiText = playerColor === 'w'
+            ? `${skin.bIcon} AI Thinking...`
+            : `${skin.wIcon} AI Thinking...`;
+          badge.innerText = isPlayer ? pText : aiText;
+        }
+      }
+    }
+
+    // --- 6. GLITCH-FREE TAP VS DRAG DETECTION ---
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let downX = 0, downY = 0;
+
+    window.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+      if (!e.target.closest('#top-hud') && !isAnyModalOpen()) {
+        desiredCamPos = null;
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      const canControlCurrentTurn = (gameMode === '2p') || (game.turn() === playerColor);
+      if (isAnyModalOpen() || isAnimating || !canControlCurrentTurn || e.target.closest('#top-hud')) return;
+
+      const moveDist = Math.hypot(e.clientX - downX, e.clientY - downY);
+      if (moveDist > 7) return;
+
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+
+      const pieceRoots = Object.values(pieceMeshes);
+      const allTargets = [...highlightMeshes, ...pieceRoots, ...interactables];
+      const hits = raycaster.intersectObjects(allTargets, true);
+
+      if (hits.length > 0) {
+        let clickedSq = hits[0].object.userData.square;
+        if (!clickedSq && hits[0].object.parent) {
+          clickedSq = hits[0].object.parent.userData.square;
+        }
+        if (!clickedSq) return;
+
+        if (selectedSquare) {
+          const isValid = game.moves({ square: selectedSquare, verbose: true }).some(m => m.to === clickedSq);
+          if (isValid) {
+            if (isMovePromotion(selectedSquare, clickedSq)) {
+              playCartoonSFX('select');
+              pendingPromotion = { from: selectedSquare, to: clickedSq };
+              document.getElementById('promo-modal').style.display = 'flex';
+            } else {
+              executeMove(selectedSquare, clickedSq, 'q');
+            }
+            return;
+          }
+        }
+
+        const piece = game.get(clickedSq);
+        if (piece && piece.color === game.turn()) {
+          if (selectedSquare === clickedSq) {
+            clearSelectionAndHighlights();
+          } else {
+            selectPieceOnSquare(clickedSq);
+          }
+        } else {
+          clearSelectionAndHighlights();
+        }
+      } else {
+        clearSelectionAndHighlights();
+      }
+    });
+
+    // --- 7. UI BUTTONS & VOLUME CONTROLS ---
+    document.getElementById('undo-btn').addEventListener('click', undoLastDecision);
+    document.getElementById('hint-btn').addEventListener('click', showSmartHint);
+
+    document.getElementById('env-btn').addEventListener('click', () => {
+      playCartoonSFX('select');
+      const nextIdx = (ENV_ORDER.indexOf(envType) + 1) % ENV_ORDER.length;
+      setEnvironment(ENV_ORDER[nextIdx]);
+    });
+
+    document.getElementById('theme-btn').addEventListener('click', () => {
+      playCartoonSFX('select');
+      setDarkMode(!isDarkMode);
+    });
+
+    document.getElementById('cam-btn').addEventListener('click', () => {
+      isTopDown = !isTopDown;
+      const activeSide = gameMode === '2p' ? game.turn() : playerColor;
+      positionCameraForSide(activeSide, true);
+    });
+
+    const volSlider = document.getElementById('vol-slider');
+    const muteIcon = document.getElementById('mute-icon');
+
+    volSlider.addEventListener('input', (e) => {
+      initAudio();
+      const val = parseFloat(e.target.value);
+      if (val > 0) lastUnmutedVolume = val;
+      setMasterVolume(val);
+    });
+
+    muteIcon.addEventListener('click', () => {
+      initAudio();
+      if (masterVolume > 0) {
+        lastUnmutedVolume = masterVolume;
+        volSlider.value = 0;
+        setMasterVolume(0);
+      } else {
+        const restore = lastUnmutedVolume > 0 ? lastUnmutedVolume : 0.5;
+        volSlider.value = restore;
+        setMasterVolume(restore);
+        playCartoonSFX('select');
+      }
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      playCartoonSFX('select');
+      openSetupMenu();
+    });
+
+    // --- 8. RENDER & ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const elapsed = clock.getElapsedTime();
+
+      if (desiredCamPos) {
+        camera.position.lerp(desiredCamPos, dt * 5);
+        if (camera.position.distanceTo(desiredCamPos) < 0.08) {
+          camera.position.copy(desiredCamPos);
+          desiredCamPos = null;
+        }
+      }
+
+      if (islandGroup.visible) {
+        clouds.forEach(c => {
+          const a = c.userData.baseAngle + elapsed * c.userData.speed;
+          c.position.x = Math.cos(a) * 11.8;
+          c.position.z = Math.sin(a) * 11.8;
+        });
+      }
+      if (castleGroup.visible) {
+        towerFlames.forEach((f, idx) => {
+          const s = 1 + Math.sin(elapsed * 10 + idx) * 0.15;
+          f.scale.set(1, s, 1);
+        });
+      }
+
+      if (selectedSquare && pieceMeshes[selectedSquare] && !isAnimating) {
+        const m = pieceMeshes[selectedSquare];
+        m.position.y = 0.45 + Math.sin(elapsed * 8) * 0.1;
+        m.rotation.y = Math.sin(elapsed * 5) * 0.18;
+      }
+
+      highlightMeshes.forEach(disc => {
+        const s = 1 + Math.sin(elapsed * 7) * 0.14;
+        disc.scale.set(s, 1, s);
+      });
+
+      for (let i = activeJumpers.length - 1; i >= 0; i--) {
+        const j = activeJumpers[i];
+        j.progress += dt * 3.0;
+        const t = Math.min(j.progress, 1);
+
+        j.mesh.position.lerpVectors(j.startPos, j.endPos, t);
+        j.mesh.position.y = 0.12 + Math.sin(t * Math.PI) * 1.8;
+
+        const stretch = 1 + Math.sin(t * Math.PI) * 0.24;
+        j.mesh.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
+
+        if (t > 0.72 && j.capturedMesh && !j.hasTriggeredCapture) {
+          j.hasTriggeredCapture = true;
+          playCartoonSFX('pow');
+          const words = ['POW!', 'BAM!', 'BONK!', 'SMASH!'];
+          showComicPopup(words[Math.floor(Math.random() * words.length)]);
+          spawnBurstParticles(j.endPos);
+          flyingDebris.push({
+            mesh: j.capturedMesh,
+            vel: new THREE.Vector3((Math.random() - 0.5) * 7, 8.5, (Math.random() - 0.5) * 7),
+            rot: new THREE.Vector3(10, 7, 9)
+          });
+        }
+
+        if (t >= 1) {
+          j.mesh.position.copy(j.endPos);
+          j.mesh.scale.set(1, 1, 1);
+          j.mesh.rotation.y = 0;
+          activeJumpers.splice(i, 1);
+          j.onComplete();
+        }
+      }
+
+      for (let i = flyingDebris.length - 1; i >= 0; i--) {
+        const d = flyingDebris[i];
+        d.mesh.position.addScaledVector(d.vel, dt);
+        d.vel.y -= 24 * dt;
+        d.mesh.rotation.x += d.rot.x * dt;
+        d.mesh.rotation.z += d.rot.z * dt;
+        if (d.mesh.position.y < -10) {
+          scene.remove(d.mesh);
+          flyingDebris.splice(i, 1);
+        }
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.life -= dt * 1.8;
+        p.mesh.position.addScaledVector(p.vel, dt);
+        p.vel.y -= 15 * dt;
+        p.mesh.scale.setScalar(Math.max(p.life, 0.01));
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          particles.splice(i, 1);
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
