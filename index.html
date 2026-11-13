@@ -135,11 +135,50 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       z-index: 10;
       width: 96vw;
       max-width: 820px;
       pointer-events: none;
+      transition: all 0.25s ease;
+    }
+    #hud-collapsible {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      transform-origin: top center;
+    }
+    #top-hud.hud-hidden #hud-collapsible {
+      display: none;
+    }
+    #mini-hud-bar {
+      pointer-events: auto;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 3px solid #1a1a2e;
+      border-radius: 999px;
+      padding: 4px 12px;
+      box-shadow: 0 4px 0 #1a1a2e;
+      font-weight: 900;
+      font-size: 12px;
+      color: #1a1a2e;
+    }
+    body.cozy-mode #mini-hud-bar {
+      background: rgba(255, 248, 238, 0.94);
+    }
+    body.dark-mode #mini-hud-bar {
+      background: rgba(31, 36, 61, 0.94);
+      border-color: #0b0d19;
+      box-shadow: 0 4px 0 #0b0d19;
+      color: #fffffe;
+    }
+    #top-hud.hud-hidden #mini-hud-bar {
+      display: inline-flex;
     }
     #ui-bar, #trophy-bar {
       pointer-events: auto;
@@ -515,42 +554,53 @@
 </head>
 <body class="cozy-mode">
 
-  <!-- Top HUD: Controls + Captured Trophy Bar -->
+  <!-- Top HUD: Collapsible Controls + Mini Pill Bar -->
   <div id="top-hud">
-    <div id="ui-bar">
-      <span id="turn-badge">🟢 Mint's Turn</span>
-      <button class="btn" id="undo-btn" style="background:#f4a261;" disabled>↩️ Undo</button>
-      <button class="btn" id="hint-btn" style="background:#56cfe1;">💡 Hint</button>
-      <button class="btn" id="env-btn" style="background:#ddb892;">🌌 Void</button>
+    <!-- Full Controls & Trophy Bar -->
+    <div id="hud-collapsible">
+      <div id="ui-bar">
+        <span id="turn-badge">🟢 Mint's Turn</span>
+        <button class="btn" id="undo-btn" style="background:#f4a261;" disabled>↩️ Undo</button>
+        <button class="btn" id="hint-btn" style="background:#56cfe1;">💡 Hint</button>
+        <button class="btn" id="env-btn" style="background:#ddb892;">🌌 Void</button>
 
-      <!-- Direct 3-Button Lighting Selector on the Top Bar -->
-      <div class="light-switcher" title="Choose Lighting Mode">
-        <button class="light-opt" id="top-light-sunny" onclick="setLightingMode('sunny')">☀️ Sunny</button>
-        <button class="light-opt active" id="top-light-cozy" onclick="setLightingMode('cozy')">🌅 Cozy</button>
-        <button class="light-opt" id="top-light-dark" onclick="setLightingMode('dark')">🌙 Dark</button>
+        <!-- Direct 3-Option Lighting Selector on the Top Bar -->
+        <div class="light-switcher" title="Choose Lighting Mode">
+          <button class="light-opt" id="top-light-sunny" onclick="setLightingMode('sunny')">☀️ Sunny</button>
+          <button class="light-opt active" id="top-light-cozy" onclick="setLightingMode('cozy')">🌅 Cozy</button>
+          <button class="light-opt" id="top-light-dark" onclick="setLightingMode('dark')">🌙 Dark</button>
+        </div>
+
+        <button class="btn" id="cam-btn">2D / 3D</button>
+        <div class="vol-group" title="Adjust Sound Volume">
+          <span id="mute-icon">🔊</span>
+          <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" />
+        </div>
+        <button class="btn" id="reset-btn" style="background:#ffbe0b;">⚙️ Menu</button>
+        <button class="btn" id="hide-hud-btn" style="background:#e2e8f0;" title="Hide Top Bar">🔼 Hide</button>
       </div>
 
-      <button class="btn" id="cam-btn">2D / 3D</button>
-      <div class="vol-group" title="Adjust Sound Volume">
-        <span id="mute-icon">🔊</span>
-        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" />
+      <!-- Live Captured Pieces & Timer Bar -->
+      <div id="trophy-bar">
+        <div class="trophy-side">
+          <span id="w-team-dot">🟢</span>
+          <span class="clock-pill" id="w-clock">05:00</span>
+          <span id="w-captured">—</span>
+        </div>
+        <span style="opacity:0.35;">|</span>
+        <div class="trophy-side">
+          <span id="b-team-dot">🌸</span>
+          <span class="clock-pill" id="b-clock">05:00</span>
+          <span id="b-captured">—</span>
+        </div>
       </div>
-      <button class="btn" id="reset-btn" style="background:#ffbe0b;">⚙️ Menu</button>
     </div>
 
-    <!-- Live Captured Pieces & Timer Bar -->
-    <div id="trophy-bar">
-      <div class="trophy-side">
-        <span id="w-team-dot">🟢</span>
-        <span class="clock-pill" id="w-clock">05:00</span>
-        <span id="w-captured">—</span>
-      </div>
-      <span style="opacity:0.35;">|</span>
-      <div class="trophy-side">
-        <span id="b-team-dot">🌸</span>
-        <span class="clock-pill" id="b-clock">05:00</span>
-        <span id="b-captured">—</span>
-      </div>
+    <!-- Compact Mini Pill Bar (Shown when Top Bar is Hidden) -->
+    <div id="mini-hud-bar">
+      <span id="mini-turn-badge">🟢 Mint's Turn</span>
+      <button class="btn" id="mini-cam-btn" style="padding:3px 8px; font-size:11px;">2D / 3D</button>
+      <button class="btn" id="show-hud-btn" style="background:#ffbe0b; padding:3px 9px; font-size:11px;">🔽 Bar</button>
     </div>
   </div>
 
@@ -815,7 +865,7 @@
     controls.dampingFactor = 0.08;
     controls.maxPolarAngle = Math.PI / 2.2;
     controls.minDistance = 7;
-    controls.maxDistance = 26;
+    controls.maxDistance = 42;
     controls.target.set(0, 0, 0);
 
     // --- 2. LIVELY CEL SHADING & 3-MODE LIGHTING ENGINE ---
@@ -1421,18 +1471,50 @@
     initBoardPieces();
     applyBoardThemeColors();
 
-    function positionCameraForSide(sideColor, smooth = false) {
+    // Responsive Camera Framing for Mobile Portrait & Desktop (2D & 3D)
+    function getResponsiveCameraVectors(sideColor) {
       const zSide = sideColor === 'w' ? 1 : -1;
-      const targetVec = isTopDown
-        ? new THREE.Vector3(0, 15.5, 0.01 * zSide)
-        : new THREE.Vector3(0, 11.8, 10.8 * zSide);
+      const aspect = window.innerWidth / Math.max(window.innerHeight, 1);
+      // On narrow mobile portrait screens (aspect < 1), scale distance by 1/aspect so the full 8.9x8.9 board fits!
+      const portraitScale = aspect < 0.88 ? (0.88 / aspect) : 1.0;
+      const isHudHidden = document.getElementById('top-hud').classList.contains('hud-hidden');
+
+      if (isTopDown) {
+        // 2D Top-Down View: Straight overhead, scaled to fit the full board width with margins
+        const height2D = Math.min(36, 15.2 * portraitScale);
+        // Shift target slightly up on Z if top HUD is open so the board sits centered in the open space below the HUD
+        const zTargetOffset = (!isHudHidden && aspect < 0.8) ? (-0.75 * zSide) : 0;
+        return {
+          pos: new THREE.Vector3(0, height2D, zTargetOffset + 0.01 * zSide),
+          target: new THREE.Vector3(0, 0, zTargetOffset)
+        };
+      } else {
+        // 3D Angled View: Scale back on portrait phones so all 8 files (a-h) fit inside the screen edges
+        const y3D = 11.6 * Math.pow(portraitScale, 0.88);
+        const z3D = 10.6 * Math.pow(portraitScale, 0.92) * zSide;
+        const zTargetOffset = (!isHudHidden && aspect < 0.8) ? (-0.55 * zSide) : 0;
+        return {
+          pos: new THREE.Vector3(0, y3D, z3D),
+          target: new THREE.Vector3(0, 0, zTargetOffset)
+        };
+      }
+    }
+
+    let desiredTargetPos = null;
+
+    function positionCameraForSide(sideColor, smooth = false) {
+      const { pos, target } = getResponsiveCameraVectors(sideColor);
+      // Lock horizontal rotation in 2D mode so the board stays straight and aligned with the screen
+      controls.enableRotate = !isTopDown;
 
       if (smooth) {
-        desiredCamPos = targetVec;
+        desiredCamPos = pos;
+        desiredTargetPos = target;
       } else {
         desiredCamPos = null;
-        camera.position.copy(targetVec);
-        controls.target.set(0, 0, 0);
+        desiredTargetPos = null;
+        camera.position.copy(pos);
+        controls.target.copy(target);
         controls.update();
       }
     }
@@ -1847,6 +1929,7 @@
 
     function updateTurnUI() {
       const badge = document.getElementById('turn-badge');
+      const miniBadge = document.getElementById('mini-turn-badge');
       const turn = game.turn();
       const skin = SQUAD_SKINS[currentSkinKey];
 
@@ -1883,6 +1966,7 @@
           badge.innerText = isPlayer ? pText : aiText;
         }
       }
+      if (miniBadge) miniBadge.innerText = badge.innerText;
     }
 
     // --- 6. GLITCH-FREE TAP VS DRAG DETECTION ---
@@ -1959,11 +2043,27 @@
       setEnvironment(ENV_ORDER[nextIdx]);
     });
 
-    document.getElementById('cam-btn').addEventListener('click', () => {
+    function toggleCamera2D3D() {
+      playCartoonSFX('select');
       isTopDown = !isTopDown;
       const activeSide = gameMode === '2p' ? game.turn() : playerColor;
       positionCameraForSide(activeSide, true);
-    });
+    }
+
+    document.getElementById('cam-btn').addEventListener('click', toggleCamera2D3D);
+    document.getElementById('mini-cam-btn').addEventListener('click', toggleCamera2D3D);
+
+    function setHudCollapsed(collapsed) {
+      playCartoonSFX('select');
+      const topHud = document.getElementById('top-hud');
+      topHud.classList.toggle('hud-hidden', collapsed);
+      document.getElementById('hint').style.display = collapsed ? 'none' : 'block';
+      const activeSide = gameMode === '2p' ? game.turn() : playerColor;
+      positionCameraForSide(activeSide, true);
+    }
+
+    document.getElementById('hide-hud-btn').addEventListener('click', () => setHudCollapsed(true));
+    document.getElementById('show-hud-btn').addEventListener('click', () => setHudCollapsed(false));
 
     const volSlider = document.getElementById('vol-slider');
     const muteIcon = document.getElementById('mute-icon');
@@ -2002,10 +2102,15 @@
       const elapsed = clock.getElapsedTime();
 
       if (desiredCamPos) {
-        camera.position.lerp(desiredCamPos, dt * 5);
-        if (camera.position.distanceTo(desiredCamPos) < 0.08) {
+        camera.position.lerp(desiredCamPos, dt * 6);
+        if (desiredTargetPos) {
+          controls.target.lerp(desiredTargetPos, dt * 6);
+        }
+        if (camera.position.distanceTo(desiredCamPos) < 0.06) {
           camera.position.copy(desiredCamPos);
+          if (desiredTargetPos) controls.target.copy(desiredTargetPos);
           desiredCamPos = null;
+          desiredTargetPos = null;
         }
       }
 
@@ -2100,6 +2205,8 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      const activeSide = gameMode === '2p' ? game.turn() : playerColor;
+      positionCameraForSide(activeSide, false);
     });
   </script>
 </body>
