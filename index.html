@@ -102,34 +102,61 @@
     })();
   </script>
   <style>
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+    }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
     html, body {
       margin: 0;
       padding: 0;
+      position: fixed;
+      inset: 0;
       width: 100%;
       height: 100%;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
       overflow: hidden;
       overscroll-behavior: none;
       -webkit-touch-callout: none;
+      background-color: #f4a261;
     }
     body {
       /* Default: Sunny Pop Mode */
       background: radial-gradient(circle at center, #fff3c4 0%, #ffca58 100%);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       touch-action: none;
       transition: background 0.35s ease;
     }
-    /* Cozy Warm / Golden Hour Mode (Eye-soothing without feeling gloomy!) */
+    /* Cozy Warm / Golden Hour Mode */
     body.cozy-mode {
+      background-color: #f4a261;
       background: radial-gradient(circle at center, #fde2c4 0%, #f4a261 100%);
     }
     /* Midnight Dark Mode */
     body.dark-mode {
+      background-color: #0f1021;
       background: radial-gradient(circle at center, #232946 0%, #0f1021 100%);
     }
+    /* Pin WebGL Canvas across 100% of physical screen including behind home indicator */
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      z-index: 1;
+    }
     #top-hud {
-      position: absolute;
-      top: max(10px, env(safe-area-inset-top, 10px));
+      position: fixed;
+      top: calc(var(--safe-top) + 6px);
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -137,7 +164,7 @@
       align-items: center;
       gap: 5px;
       z-index: 10;
-      width: 96vw;
+      width: 95vw;
       max-width: 820px;
       pointer-events: none;
       transition: all 0.25s ease;
@@ -158,21 +185,21 @@
       pointer-events: auto;
       display: none;
       align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.92);
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.94);
       border: 3px solid #1a1a2e;
       border-radius: 999px;
-      padding: 4px 12px;
+      padding: 4px 10px;
       box-shadow: 0 4px 0 #1a1a2e;
       font-weight: 900;
       font-size: 12px;
       color: #1a1a2e;
     }
     body.cozy-mode #mini-hud-bar {
-      background: rgba(255, 248, 238, 0.94);
+      background: rgba(255, 248, 238, 0.95);
     }
     body.dark-mode #mini-hud-bar {
-      background: rgba(31, 36, 61, 0.94);
+      background: rgba(31, 36, 61, 0.95);
       border-color: #0b0d19;
       box-shadow: 0 4px 0 #0b0d19;
       color: #fffffe;
@@ -185,12 +212,12 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       align-items: center;
       background: #ffffff;
-      border: 4px solid #1a1a2e;
-      border-radius: 999px;
-      padding: 6px 14px;
+      border: 3.5px solid #1a1a2e;
+      border-radius: 24px;
+      padding: 6px 10px;
       box-shadow: 0 5px 0 #1a1a2e;
       transition: background 0.3s, border-color 0.3s;
     }
@@ -205,11 +232,12 @@
       box-shadow: 0 5px 0 #0b0d19;
     }
     #trophy-bar {
-      padding: 4px 14px;
-      font-size: 13px;
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 12px;
       font-weight: 900;
-      gap: 14px;
-      min-height: 32px;
+      gap: 10px;
+      min-height: 28px;
     }
     .trophy-side {
       display: flex;
@@ -225,17 +253,17 @@
       color: #1a1a2e;
       border: 2px solid #1a1a2e;
       border-radius: 99px;
-      padding: 1px 8px;
-      font-size: 12px;
+      padding: 1px 7px;
+      font-size: 11px;
       font-weight: 900;
       display: none;
     }
     #turn-badge {
       font-weight: 900;
-      font-size: 13px;
+      font-size: 12px;
       color: #1a1a2e;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       padding: 0 4px;
       white-space: nowrap;
     }
@@ -245,19 +273,19 @@
     .btn {
       background: #06d6a0;
       color: #1a1a2e;
-      border: 3px solid #1a1a2e;
+      border: 2.5px solid #1a1a2e;
       border-radius: 999px;
-      padding: 5px 10px;
+      padding: 4px 9px;
       font-weight: 800;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
       box-shadow: 0 3px 0 #1a1a2e;
       transition: transform 0.1s, opacity 0.2s, background 0.2s;
       white-space: nowrap;
     }
     .btn:active:not(:disabled) {
-      transform: translateY(3px);
-      box-shadow: 0 0 0 #1a1a2e;
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1a1a2e;
     }
     .btn:disabled {
       opacity: 0.45;
@@ -269,7 +297,7 @@
       display: flex;
       align-items: center;
       background: #eae4d7;
-      border: 3px solid #1a1a2e;
+      border: 2.5px solid #1a1a2e;
       border-radius: 999px;
       padding: 2px;
       box-shadow: 0 3px 0 #1a1a2e;
@@ -283,8 +311,8 @@
       background: transparent;
       color: #1a1a2e;
       font-weight: 900;
-      font-size: 11px;
-      padding: 4px 8px;
+      font-size: 10.5px;
+      padding: 3px 7px;
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.15s;
@@ -296,53 +324,54 @@
     .light-opt.active {
       background: #ffbe0b;
       color: #1a1a2e;
-      box-shadow: 0 2px 0 #1a1a2e;
+      box-shadow: 0 1.5px 0 #1a1a2e;
     }
     .vol-group {
       display: flex;
       align-items: center;
       gap: 4px;
       background: #a8dadc;
-      border: 3px solid #1a1a2e;
+      border: 2.5px solid #1a1a2e;
       border-radius: 999px;
-      padding: 3px 9px;
+      padding: 3px 8px;
       box-shadow: 0 3px 0 #1a1a2e;
     }
     #mute-icon {
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1;
     }
     #vol-slider {
-      width: 50px;
-      height: 6px;
+      width: 44px;
+      height: 5px;
       accent-color: #1a1a2e;
       cursor: pointer;
       margin: 0;
     }
-    /* Shared Comic Modal Overlay */
+    /* Shared Comic Modal Overlay with iPhone 17 Safe Area Support */
     .modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(26, 26, 46, 0.72);
       backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 50;
-      padding: 12px;
+      padding: calc(var(--safe-top) + 10px) 12px calc(var(--safe-bottom) + 12px) 12px;
     }
     .modal-card {
       position: relative;
       background: #ffffff;
-      border: 5px solid #1a1a2e;
-      border-radius: 26px;
-      padding: 18px 20px;
+      border: 4.5px solid #1a1a2e;
+      border-radius: 24px;
+      padding: 14px 16px;
       text-align: center;
-      box-shadow: 0 10px 0 #1a1a2e;
-      max-width: 94vw;
-      width: 440px;
-      max-height: 92vh;
+      box-shadow: 0 8px 0 #1a1a2e;
+      width: 100%;
+      max-width: 390px;
+      max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 24px);
       overflow-y: auto;
       animation: popIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       transition: background 0.3s, color 0.3s;
@@ -353,7 +382,7 @@
     body.dark-mode .modal-card {
       background: #232946;
       border-color: #0b0d19;
-      box-shadow: 0 10px 0 #0b0d19;
+      box-shadow: 0 8px 0 #0b0d19;
     }
     @keyframes popIn {
       from { transform: scale(0.7); opacity: 0; }
@@ -361,16 +390,16 @@
     }
     .close-modal-btn {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 34px;
-      height: 34px;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      border: 3px solid #1a1a2e;
+      border: 2.5px solid #1a1a2e;
       background: #ef476f;
       color: #ffffff;
       font-weight: 900;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 1;
       cursor: pointer;
       box-shadow: 0 3px 0 #1a1a2e;
@@ -385,67 +414,73 @@
     #resume-game-btn {
       display: none;
       width: 100%;
-      margin: 8px 0 6px 0;
+      margin: 6px 0 4px 0;
       background: #00f5d4;
       color: #1a1a2e;
-      border: 4px solid #1a1a2e;
-      border-radius: 16px;
-      padding: 11px 14px;
+      border: 3.5px solid #1a1a2e;
+      border-radius: 14px;
+      padding: 9px 12px;
       font-weight: 900;
-      font-size: 15px;
+      font-size: 13.5px;
       cursor: pointer;
-      box-shadow: 0 5px 0 #1a1a2e;
+      box-shadow: 0 4px 0 #1a1a2e;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       transition: transform 0.1s;
     }
     #resume-game-btn:active {
-      transform: translateY(4px);
+      transform: translateY(3px);
       box-shadow: 0 1px 0 #1a1a2e;
     }
     .modal-title {
       margin: 0 0 2px 0;
-      font-size: 23px;
+      font-size: 20px;
       font-weight: 900;
       color: #1a1a2e;
       text-transform: uppercase;
     }
     body.dark-mode .modal-title { color: #fffffe; }
     .modal-sub {
-      margin: 4px 0 14px 0;
-      font-size: 13px;
+      margin: 4px 0 12px 0;
+      font-size: 12.5px;
       font-weight: 700;
       color: #444;
     }
     body.dark-mode .modal-sub { color: #b8c1ec; }
     .section-label {
-      margin: 10px 0 5px 0;
-      font-size: 11px;
+      margin: 8px 0 4px 0;
+      font-size: 10px;
       font-weight: 900;
       color: #555;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.7px;
     }
     body.dark-mode .section-label { color: #b8c1ec; }
+    /* Single-Line Non-Wrapping Pill Rows so 4 buttons (Void/Table/Island/Castle & Clock) never wrap on iPhone! */
     .pill-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+      flex-wrap: nowrap;
+      gap: 5px;
       justify-content: center;
+      width: 100%;
     }
     .pill-btn {
-      flex: 1;
-      min-width: 78px;
-      border: 3px solid #1a1a2e;
-      border-radius: 12px;
-      padding: 7px 5px;
+      flex: 1 1 0;
+      min-width: 0;
+      border: 2.5px solid #1a1a2e;
+      border-radius: 11px;
+      padding: 6px 3px;
       font-weight: 900;
-      font-size: 11px;
+      font-size: 10.5px;
+      line-height: 1.15;
       background: #f4f4f8;
       color: #1a1a2e;
       cursor: pointer;
       box-shadow: 0 3px 0 #1a1a2e;
       transition: all 0.1s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .pill-btn.active {
       background: #ffbe0b;
@@ -455,52 +490,52 @@
     .team-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 6px;
+      gap: 8px;
+      margin-top: 5px;
     }
     .team-choice {
-      border: 4px solid #1a1a2e;
-      border-radius: 18px;
-      padding: 12px 8px;
+      border: 3.5px solid #1a1a2e;
+      border-radius: 16px;
+      padding: 9px 6px;
       font-weight: 900;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
-      box-shadow: 0 5px 0 #1a1a2e;
+      box-shadow: 0 4px 0 #1a1a2e;
       transition: transform 0.12s;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
     .team-choice:active {
-      transform: translateY(4px);
+      transform: translateY(3px);
       box-shadow: 0 1px 0 #1a1a2e;
     }
     .team-mint { background: #06d6a0; color: #1a1a2e; }
     .team-neon { background: #ef476f; color: #ffffff; }
     .team-tag {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 800;
       background: rgba(26, 26, 46, 0.2);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 99px;
     }
     .promo-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 8px;
     }
     .promo-btn {
-      border: 4px solid #1a1a2e;
-      border-radius: 18px;
-      padding: 14px 10px;
+      border: 3.5px solid #1a1a2e;
+      border-radius: 16px;
+      padding: 12px 8px;
       font-weight: 900;
-      font-size: 15px;
+      font-size: 14px;
       background: #ffbe0b;
       color: #1a1a2e;
       cursor: pointer;
-      box-shadow: 0 5px 0 #1a1a2e;
+      box-shadow: 0 4px 0 #1a1a2e;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -509,25 +544,25 @@
     .end-actions {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 12px;
     }
     .action-btn {
-      border: 4px solid #1a1a2e;
-      border-radius: 18px;
-      padding: 13px 16px;
+      border: 3.5px solid #1a1a2e;
+      border-radius: 16px;
+      padding: 11px 14px;
       font-weight: 900;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      box-shadow: 0 5px 0 #1a1a2e;
+      box-shadow: 0 4px 0 #1a1a2e;
       text-transform: uppercase;
     }
     #comic-popup {
-      position: absolute;
-      top: 34%;
+      position: fixed;
+      top: 38%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
-      font-size: 54px;
+      font-size: 48px;
       font-weight: 900;
       color: #ffbe0b;
       -webkit-text-stroke: 3px #1a1a2e;
@@ -537,14 +572,17 @@
       z-index: 20;
     }
     #hint {
-      position: absolute;
-      bottom: 12px;
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 10px);
+      left: 0;
       width: 100%;
+      padding: 0 12px;
       text-align: center;
       font-weight: 800;
-      font-size: 12px;
+      font-size: 11.5px;
       color: #2b2d42;
       pointer-events: none;
+      z-index: 10;
     }
     body.dark-mode #hint { color: #b8c1ec; }
   </style>
@@ -599,8 +637,10 @@
     <!-- Compact Mini Pill Bar (Shown when Top Bar is Hidden) -->
     <div id="mini-hud-bar">
       <span id="mini-turn-badge">🟢 Mint's Turn</span>
+      <button class="btn" id="mini-undo-btn" style="background:#f4a261; padding:3px 8px; font-size:11px;" disabled>↩️</button>
       <button class="btn" id="mini-cam-btn" style="padding:3px 8px; font-size:11px;">2D / 3D</button>
-      <button class="btn" id="show-hud-btn" style="background:#ffbe0b; padding:3px 9px; font-size:11px;">🔽 Bar</button>
+      <button class="btn" id="mini-menu-btn" style="background:#ffbe0b; padding:3px 8px; font-size:11px;">⚙️</button>
+      <button class="btn" id="show-hud-btn" style="background:#e2e8f0; padding:3px 8px; font-size:11px;">🔽 Bar</button>
     </div>
   </div>
 
@@ -640,9 +680,9 @@
 
       <div class="section-label">4. Lighting Atmosphere (Pick One)</div>
       <div class="pill-row">
-        <button class="pill-btn" id="menu-light-sunny" onclick="setLightingMode('sunny')">☀️ Sunny Pop</button>
+        <button class="pill-btn" id="menu-light-sunny" onclick="setLightingMode('sunny')">☀️ Sunny</button>
         <button class="pill-btn active" id="menu-light-cozy" onclick="setLightingMode('cozy')">🌅 Cozy Warm</button>
-        <button class="pill-btn" id="menu-light-dark" onclick="setLightingMode('dark')">🌙 Midnight Dark</button>
+        <button class="pill-btn" id="menu-light-dark" onclick="setLightingMode('dark')">🌙 Midnight</button>
       </div>
 
       <div class="section-label">5. Match Clock (Blitz Timer)</div>
@@ -848,13 +888,24 @@
       }
     }
 
-    // --- 1. SCENE, CAMERA & RENDERER ---
+    // --- 1. SCENE, CAMERA & RENDERER (WITH IPHONE 17 FULL-VIEWPORT SUPPORT) ---
+    function getScreenSize() {
+      const w = document.documentElement.clientWidth || window.innerWidth;
+      const h = Math.max(
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0,
+        window.visualViewport ? window.visualViewport.height : 0
+      );
+      return { w, h };
+    }
+
+    const initSize = getScreenSize();
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(40, initSize.w / initSize.h, 0.1, 100);
     camera.position.set(0, 11.8, 10.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(initSize.w, initSize.h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1471,30 +1522,44 @@
     initBoardPieces();
     applyBoardThemeColors();
 
-    // Responsive Camera Framing for Mobile Portrait & Desktop (2D & 3D)
+    // Exact Mathematical Camera Framing for iPhone 17 Portrait & Desktop (2D & 3D)
     function getResponsiveCameraVectors(sideColor) {
       const zSide = sideColor === 'w' ? 1 : -1;
-      const aspect = window.innerWidth / Math.max(window.innerHeight, 1);
-      // On narrow mobile portrait screens (aspect < 1), scale distance by 1/aspect so the full 8.9x8.9 board fits!
-      const portraitScale = aspect < 0.88 ? (0.88 / aspect) : 1.0;
+      const { w, h } = getScreenSize();
+      const aspect = w / Math.max(h, 1);
+
+      // Widen vertical FOV slightly on tall mobile screens (aspect < 0.75) so horizontal FOV stays generous
+      camera.fov = aspect < 0.75 ? 48 : 40;
+      camera.aspect = aspect;
+      camera.updateProjectionMatrix();
+
+      // Calculate exact horizontal half-FOV in radians
+      const vFovRad = THREE.MathUtils.degToRad(camera.fov);
+      const hFovHalf = Math.atan(Math.tan(vFovRad / 2) * aspect);
+
+      // The chessboard border is 8.9 units wide; we want at least 9.8 units of horizontal world width visible
+      // so the entire board + side margin fits inside the left/right edges of the iPhone 17 screen!
+      const requiredHalfWidth = 4.95;
+      const minHorizontalDist = requiredHalfWidth / Math.tan(hFovHalf);
+
       const isHudHidden = document.getElementById('top-hud').classList.contains('hud-hidden');
 
       if (isTopDown) {
-        // 2D Top-Down View: Straight overhead, scaled to fit the full board width with margins
-        const height2D = Math.min(36, 15.2 * portraitScale);
-        // Shift target slightly up on Z if top HUD is open so the board sits centered in the open space below the HUD
-        const zTargetOffset = (!isHudHidden && aspect < 0.8) ? (-0.75 * zSide) : 0;
+        // 2D Top-Down View: Straight overhead at exact height needed to fit all 8 columns & rows
+        const height2D = Math.max(14.5, minHorizontalDist * 1.02);
+        const zTargetOffset = (!isHudHidden && aspect < 0.75) ? (-0.65 * zSide) : 0;
         return {
           pos: new THREE.Vector3(0, height2D, zTargetOffset + 0.01 * zSide),
           target: new THREE.Vector3(0, 0, zTargetOffset)
         };
       } else {
-        // 3D Angled View: Scale back on portrait phones so all 8 files (a-h) fit inside the screen edges
-        const y3D = 11.6 * Math.pow(portraitScale, 0.88);
-        const z3D = 10.6 * Math.pow(portraitScale, 0.92) * zSide;
-        const zTargetOffset = (!isHudHidden && aspect < 0.8) ? (-0.55 * zSide) : 0;
+        // 3D Angled View: Maintain a comfortable ~47-degree viewing angle while guaranteeing the front rank fits horizontally
+        const baseDist = Math.max(15.6, minHorizontalDist * 1.12);
+        const y3D = baseDist * 0.74;
+        const z3D = baseDist * 0.67 * zSide;
+        const zTargetOffset = (!isHudHidden && aspect < 0.75) ? (-0.55 * zSide) : (-0.15 * zSide);
         return {
-          pos: new THREE.Vector3(0, y3D, z3D),
+          pos: new THREE.Vector3(0, y3D, zTargetOffset + z3D),
           target: new THREE.Vector3(0, 0, zTargetOffset)
         };
       }
@@ -1504,7 +1569,6 @@
 
     function positionCameraForSide(sideColor, smooth = false) {
       const { pos, target } = getResponsiveCameraVectors(sideColor);
-      // Lock horizontal rotation in 2D mode so the board stays straight and aligned with the screen
       controls.enableRotate = !isTopDown;
 
       if (smooth) {
@@ -1521,13 +1585,13 @@
 
     function updateUndoButtonState() {
       const undoBtn = document.getElementById('undo-btn');
+      const miniUndoBtn = document.getElementById('mini-undo-btn');
       const histLen = game.history().length;
-      if (gameMode === 'ai') {
-        const minMoves = playerColor === 'b' ? 2 : 1;
-        undoBtn.disabled = histLen < minMoves;
-      } else {
-        undoBtn.disabled = histLen === 0;
-      }
+      const isDisabled = (gameMode === 'ai')
+        ? (histLen < (playerColor === 'b' ? 2 : 1))
+        : (histLen === 0);
+      undoBtn.disabled = isDisabled;
+      if (miniUndoBtn) miniUndoBtn.disabled = isDisabled;
     }
 
     function clearHintHighlights() {
@@ -1684,6 +1748,12 @@
       activeJumpers.length = 0;
       isAnimating = false;
       isTopDown = false;
+
+      // On narrow mobile screens, automatically start with the sleek 1-line Mini Bar so the board is completely unobstructed!
+      if (window.innerWidth < 600) {
+        document.getElementById('top-hud').classList.add('hud-hidden');
+        document.getElementById('hint').style.display = 'none';
+      }
 
       initBoardPieces();
       const initialViewSide = gameMode === '2p' ? 'w' : playerColor;
@@ -1989,8 +2059,9 @@
       const moveDist = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moveDist > 7) return;
 
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
 
       const pieceRoots = Object.values(pieceMeshes);
@@ -2035,7 +2106,12 @@
 
     // --- 7. UI BUTTONS & VOLUME CONTROLS ---
     document.getElementById('undo-btn').addEventListener('click', undoLastDecision);
+    document.getElementById('mini-undo-btn').addEventListener('click', undoLastDecision);
     document.getElementById('hint-btn').addEventListener('click', showSmartHint);
+    document.getElementById('mini-menu-btn').addEventListener('click', () => {
+      playCartoonSFX('select');
+      openSetupMenu();
+    });
 
     document.getElementById('env-btn').addEventListener('click', () => {
       playCartoonSFX('select');
@@ -2201,13 +2277,19 @@
     }
     animate();
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+    function handleViewportResize() {
+      const { w, h } = getScreenSize();
+      camera.aspect = w / Math.max(h, 1);
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(w, h);
       const activeSide = gameMode === '2p' ? game.turn() : playerColor;
       positionCameraForSide(activeSide, false);
-    });
+    }
+
+    window.addEventListener('resize', handleViewportResize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportResize);
+    }
   </script>
 </body>
 </html>
