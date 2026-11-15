@@ -258,6 +258,7 @@
     }
     body.dark-mode .trophy-side {
       color: #fffffe;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.55), 0 1px 2px #000000;
     }
     .clock-pill {
       background: #ffbe0b;
@@ -576,9 +577,17 @@
       transform: translate(-50%, -50%) scale(0);
       font-size: 48px;
       font-weight: 900;
+      letter-spacing: 2px;
       color: #ffbe0b;
-      -webkit-text-stroke: 3px #1a1a2e;
-      text-shadow: 5px 5px 0 #ef476f;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 6px #1a1a2e;
+      text-shadow:
+        -2px -2px 0 #1a1a2e,
+         2px -2px 0 #1a1a2e,
+        -2px  2px 0 #1a1a2e,
+         2px  2px 0 #1a1a2e,
+         0px  6px 0 #ef476f,
+         4px  6px 0 #1a1a2e;
       pointer-events: none;
       transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 20;
